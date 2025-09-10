@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ApperIcon from "@/components/ApperIcon";
-import LogoutButton from "@/components/molecules/LogoutButton";
+import LogoutButton from "@/components/atoms/LogoutButton";
 import { cn } from "@/utils/cn";
 
 const Sidebar = ({ isOpen, onToggle }) => {
