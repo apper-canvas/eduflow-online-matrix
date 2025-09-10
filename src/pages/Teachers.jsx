@@ -5,12 +5,13 @@ import ApperIcon from "@/components/ApperIcon";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
 import Loading from "@/components/ui/Loading";
-import SearchBar from "@/components/molecules/SearchBar";
 import AdvancedFilters from "@/components/molecules/AdvancedFilters";
+import SearchBar from "@/components/molecules/SearchBar";
 import Badge from "@/components/atoms/Badge";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import { cn } from "@/utils/cn";
+import Classes from "@/pages/Classes";
 
 const Teachers = () => {
 const [teachers, setTeachers] = useState([]);
@@ -19,6 +20,8 @@ const [teachers, setTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     Name: '',
@@ -86,10 +89,11 @@ const handleEdit = (teacher) => {
   }
 
 const handleView = (teacher) => {
-    toast.info(`View teacher profile: ${teacher.first_name_c || 'Unknown'} ${teacher.last_name_c || 'Unknown'}`);
+    setSelectedTeacher(teacher);
+    setShowViewModal(true);
   };
 
-  const openAddTeacherModal = () => {
+const openAddTeacherModal = () => {
     setShowAddModal(true);
   };
 
@@ -108,6 +112,11 @@ const handleView = (teacher) => {
       department_c: '',
       experience_c: ''
     });
+  };
+
+  const closeViewModal = () => {
+    setShowViewModal(false);
+    setSelectedTeacher(null);
   };
 
   const handleInputChange = (e) => {
@@ -515,6 +524,166 @@ department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort
                 </Button>
               </div>
             </form>
+          </div>
+</div>
+      )}
+      </div>
+
+      {/* View Teacher Profile Modal */}
+      {showViewModal && selectedTeacher && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
+                    <span className="text-xl font-bold text-primary-700">
+                      {selectedTeacher.first_name_c?.[0] || 'T'}{selectedTeacher.last_name_c?.[0] || 'U'}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {selectedTeacher.first_name_c || 'Unknown'} {selectedTeacher.last_name_c || 'Unknown'}
+                    </h2>
+                    <p className="text-gray-600">{selectedTeacher.email_c || 'No email provided'}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={closeViewModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <ApperIcon name="X" size={20} />
+                </Button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Basic Information */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <ApperIcon name="User" size={20} className="mr-2 text-primary-600" />
+                      Basic Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Full Name:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.Name || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Teacher ID:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.teacher_id_c || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Employee ID:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.employee_id_c || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Details */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <ApperIcon name="Phone" size={20} className="mr-2 text-primary-600" />
+                      Contact Details
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Email:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.email_c || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Phone:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.phone_c || 'N/A'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Professional Information */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <ApperIcon name="Briefcase" size={20} className="mr-2 text-primary-600" />
+                      Professional Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Department:</span>
+                        <Badge variant={getDepartmentColor(selectedTeacher.department_c)}>
+                          {selectedTeacher.department_c || 'No department'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-medium text-gray-700">Experience:</span>
+                        <span className="text-sm text-gray-900">{selectedTeacher.experience_c || 0} years</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subjects Section */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <ApperIcon name="BookOpen" size={20} className="mr-2 text-primary-600" />
+                  Subjects Taught
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {(selectedTeacher.subjects_c || '').split('\n').filter(Boolean).length > 0 ? (
+                    (selectedTeacher.subjects_c || '').split('\n').filter(Boolean).map((subject, index) => (
+                      <Badge key={index} variant="default" className="text-sm">
+                        {subject.trim()}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No subjects assigned</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Classes Assigned Section */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <ApperIcon name="Users" size={20} className="mr-2 text-primary-600" />
+                  Classes Assigned
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {(selectedTeacher.classes_assigned_c || '').split('\n').filter(Boolean).length > 0 ? (
+                    (selectedTeacher.classes_assigned_c || '').split('\n').filter(Boolean).map((classId, index) => (
+                      <Badge key={index} variant="info" className="text-sm">
+                        {classId.trim()}
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No classes assigned</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    closeViewModal();
+                    handleEdit(selectedTeacher);
+                  }}
+                >
+                  <ApperIcon name="Edit" size={16} className="mr-2" />
+                  Edit Teacher
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={closeViewModal}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
