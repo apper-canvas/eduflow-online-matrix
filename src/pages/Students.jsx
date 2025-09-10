@@ -187,8 +187,8 @@ const className = classOptions.find(option => option.value === formData.classId)
           address_c: formData.address,
 class_id_c: formData.classId,
           class_name_c: className,
-          parent_contact_c: formData.parentContact,
-          marks_c: formData.marks,
+parent_contact_c: formData.parentContact,
+          marks_c: parseInt(formData.marks) || 0,
           previous_school_name_c: formData.previousSchoolName
         };
         if (isEditMode) {

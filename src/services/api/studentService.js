@@ -22,8 +22,9 @@ async getAll() {
           {"field": {"Name": "class_id_c"}},
           {"field": {"Name": "class_name_c"}},
           {"field": {"Name": "enrollment_date_c"}},
-          {"field": {"Name": "photo_c"}},
-{"field": {"Name": "parent_contact_c"}},
+{"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}},
+          {"field": {"Name": "marks_c"}},
           {"field": {"Name": "previous_school_name_c"}}
         ],
         orderBy: [{"fieldName": "Id", "sorttype": "DESC"}],
@@ -53,8 +54,9 @@ async getAll() {
           classId: student.class_id_c || null,
           className: student.class_name_c || 'No Class Assigned',
           enrollmentDate: student.enrollment_date_c || new Date().toISOString().split('T')[0],
-          photo: student.photo_c || '',
-parentContact: student.parent_contact_c || '',
+photo: student.photo_c || '',
+          parentContact: student.parent_contact_c || '',
+          marks: student.marks_c || 0,
           previousSchoolName: student.previous_school_name_c || ''
         };
         
@@ -89,8 +91,9 @@ try {
           {"field": {"Name": "class_id_c"}},
           {"field": {"Name": "class_name_c"}},
           {"field": {"Name": "enrollment_date_c"}},
-          {"field": {"Name": "photo_c"}},
-{"field": {"Name": "parent_contact_c"}},
+{"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}},
+          {"field": {"Name": "marks_c"}},
           {"field": {"Name": "previous_school_name_c"}}
         ]
       };
@@ -119,9 +122,10 @@ try {
           classId: student.class_id_c || null,
 className: student.class_name_c || 'No Class Assigned',
           enrollmentDate: student.enrollment_date_c || new Date().toISOString().split('T')[0],
-          previousSchoolName: student.previous_school_name_c || '',
+previousSchoolName: student.previous_school_name_c || '',
           photo: student.photo_c || '',
-          parentContact: student.parent_contact_c || ''
+          parentContact: student.parent_contact_c || '',
+          marks: student.marks_c || 0
         };
         
         // Debug log for missing critical data
@@ -153,8 +157,9 @@ try {
           {"field": {"Name": "class_id_c"}},
           {"field": {"Name": "class_name_c"}},
           {"field": {"Name": "enrollment_date_c"}},
-          {"field": {"Name": "photo_c"}},
-{"field": {"Name": "parent_contact_c"}},
+{"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}},
+          {"field": {"Name": "marks_c"}},
           {"field": {"Name": "previous_school_name_c"}}
         ],
         where: [{"FieldName": "class_id_c", "Operator": "EqualTo", "Values": [parseInt(classId)]}],
@@ -184,7 +189,8 @@ try {
 enrollmentDate: student.enrollment_date_c,
         photo: student.photo_c,
         previousSchoolName: student.previous_school_name_c,
-        parentContact: student.parent_contact_c
+        parentContact: student.parent_contact_c,
+        marks: student.marks_c || 0
       }));
 
       return transformedData;
@@ -247,8 +253,9 @@ if (response.results) {
             classId: student.class_id_c,
             className: student.class_name_c,
             enrollmentDate: student.enrollment_date_c,
-            photo: student.photo_c,
-parentContact: student.parent_contact_c,
+photo: student.photo_c,
+            parentContact: student.parent_contact_c,
+            marks: student.marks_c || 0,
             previousSchoolName: student.previous_school_name_c
           };
         }
@@ -274,9 +281,10 @@ parentContact: student.parent_contact_c,
           address_c: studentData.address_c,
           class_id_c: parseInt(studentData.class_id_c),
           class_name_c: studentData.class_name_c,
-          enrollment_date_c: studentData.enrollment_date_c,
-photo_c: studentData.photo_c || "",
+enrollment_date_c: studentData.enrollment_date_c,
+          photo_c: studentData.photo_c || "",
           parent_contact_c: studentData.parent_contact_c,
+          marks_c: studentData.marks_c || 0,
           previous_school_name_c: studentData.previous_school_name_c
         }]
       };
@@ -313,8 +321,9 @@ if (response.results) {
             classId: student.class_id_c,
             className: student.class_name_c,
             enrollmentDate: student.enrollment_date_c,
-            photo: student.photo_c,
-parentContact: student.parent_contact_c,
+photo: student.photo_c,
+            parentContact: student.parent_contact_c,
+            marks: student.marks_c || 0,
             previousSchoolName: student.previous_school_name_c
           };
         }
@@ -371,9 +380,10 @@ async search(query) {
           {"field": {"Name": "address_c"}},
           {"field": {"Name": "class_id_c"}},
           {"field": {"Name": "class_name_c"}},
-          {"field": {"Name": "enrollment_date_c"}},
-{"field": {"Name": "photo_c"}},
+{"field": {"Name": "enrollment_date_c"}},
+          {"field": {"Name": "photo_c"}},
           {"field": {"Name": "parent_contact_c"}},
+          {"field": {"Name": "marks_c"}},
           {"field": {"Name": "previous_school_name_c"}}
         ],
         whereGroups: [{
@@ -408,9 +418,10 @@ async search(query) {
         address: student.address_c,
         classId: student.class_id_c,
         className: student.class_name_c,
-        enrollmentDate: student.enrollment_date_c,
-photo: student.photo_c,
+enrollmentDate: student.enrollment_date_c,
+        photo: student.photo_c,
         parentContact: student.parent_contact_c,
+        marks: student.marks_c || 0,
         previousSchoolName: student.previous_school_name_c
       }));
 
