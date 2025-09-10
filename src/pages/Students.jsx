@@ -12,7 +12,7 @@ const Students = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-
+  const [editingStudent, setEditingStudent] = useState(null);
   const loadStudents = async () => {
     try {
       setLoading(true);
@@ -31,8 +31,9 @@ const Students = () => {
     loadStudents();
   }, []);
 
-  const handleEdit = (student) => {
-    toast.info(`Edit student: ${student.firstName} ${student.lastName}`);
+const handleEdit = (student) => {
+    setEditingStudent(student);
+    setShowAddModal(true);
   };
 
   const handleDelete = async (studentId) => {
@@ -47,6 +48,7 @@ const Students = () => {
     }
   };
 const handleAddStudent = () => {
+    setEditingStudent(null);
     setShowAddModal(true);
   };
 
@@ -54,17 +56,19 @@ const handleAddStudent = () => {
     toast.info(`View student details: ${student.firstName} ${student.lastName}`);
   };
 
-  // Student Form Modal Component
+// Student Form Modal Component
   const StudentFormModal = () => {
+    const isEditMode = editingStudent !== null;
+    
     const [formData, setFormData] = useState({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      dateOfBirth: '',
-      address: '',
-      classId: '',
-      parentContact: ''
+      firstName: editingStudent?.first_name_c || '',
+      lastName: editingStudent?.last_name_c || '',
+      email: editingStudent?.email_c || '',
+      phone: editingStudent?.phone_c || '',
+      dateOfBirth: editingStudent?.date_of_birth_c || '',
+      address: editingStudent?.address_c || '',
+      classId: editingStudent?.class_id_c || '',
+      parentContact: editingStudent?.parent_contact_c || ''
     });
     const [formErrors, setFormErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
@@ -141,7 +145,7 @@ const handleAddStudent = () => {
         return;
       }
 
-      setSubmitting(true);
+setSubmitting(true);
       try {
 const className = classOptions.find(option => option.value === formData.classId)?.label || '';
         const studentData = {
@@ -156,20 +160,28 @@ const className = classOptions.find(option => option.value === formData.classId)
           parent_contact_c: formData.parentContact
         };
         
-        await studentService.create(studentData);
-        toast.success('Student added successfully!');
+        if (isEditMode) {
+          await studentService.update(editingStudent.Id, studentData);
+          toast.success('Student updated successfully!');
+        } else {
+          await studentService.create(studentData);
+          toast.success('Student added successfully!');
+        }
+        
         setShowAddModal(false);
+        setEditingStudent(null);
         loadStudents(); // Refresh the list
       } catch (error) {
-        console.error('Error creating student:', error);
-        toast.error('Failed to add student. Please try again.');
+        console.error(`Error ${isEditMode ? 'updating' : 'creating'} student:`, error);
+        toast.error(`Failed to ${isEditMode ? 'update' : 'add'} student. Please try again.`);
       } finally {
         setSubmitting(false);
       }
     };
 
-    const handleCloseModal = () => {
+const handleCloseModal = () => {
       setShowAddModal(false);
+      setEditingStudent(null);
       setFormData({
         firstName: '',
         lastName: '',
@@ -187,8 +199,10 @@ const className = classOptions.find(option => option.value === formData.classId)
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Add New Student</h2>
+<div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Edit Student' : 'Add New Student'}
+              </h2>
               <button
                 onClick={handleCloseModal}
                 className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -287,9 +301,12 @@ const className = classOptions.find(option => option.value === formData.classId)
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {submitting ? 'Adding...' : 'Add Student'}
+                  {submitting 
+                    ? (isEditMode ? 'Updating...' : 'Adding...') 
+                    : (isEditMode ? 'Update Student' : 'Add Student')
+                  }
                 </button>
               </div>
             </form>
