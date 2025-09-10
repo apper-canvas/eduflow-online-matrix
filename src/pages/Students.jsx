@@ -60,16 +60,32 @@ const handleAddStudent = () => {
   const StudentFormModal = () => {
     const isEditMode = editingStudent !== null;
     
-    const [formData, setFormData] = useState({
-      firstName: editingStudent?.first_name_c || '',
-      lastName: editingStudent?.last_name_c || '',
-      email: editingStudent?.email_c || '',
-      phone: editingStudent?.phone_c || '',
-      dateOfBirth: editingStudent?.date_of_birth_c || '',
-      address: editingStudent?.address_c || '',
-      classId: editingStudent?.class_id_c || '',
-      parentContact: editingStudent?.parent_contact_c || ''
+const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      dateOfBirth: '',
+      address: '',
+      classId: '',
+      parentContact: ''
     });
+
+    // Update form data when editingStudent changes
+    useEffect(() => {
+      if (editingStudent) {
+        setFormData({
+          firstName: editingStudent.first_name_c || '',
+          lastName: editingStudent.last_name_c || '',
+          email: editingStudent.email_c || '',
+          phone: editingStudent.phone_c || '',
+          dateOfBirth: editingStudent.date_of_birth_c || '',
+          address: editingStudent.address_c || '',
+          classId: editingStudent.class_id_c || '',
+          parentContact: editingStudent.parent_contact_c || ''
+        });
+      }
+    }, [editingStudent]);
     const [formErrors, setFormErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
