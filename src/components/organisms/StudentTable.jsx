@@ -160,8 +160,8 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, o
                 <td className="p-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-primary-700">
-                        {student.firstName[0]}{student.lastName[0]}
+<span className="text-sm font-medium text-primary-700">
+                        {student.firstName?.[0] || '?'}{student.lastName?.[0] || '?'}
                       </span>
                     </div>
                     <div>
