@@ -231,30 +231,50 @@ const Dashboard = () => {
         </Card>
 
         {/* Quick Actions */}
-        <Card className="p-6">
+<Card className="p-6">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-slate-900">Quick Actions</h2>
             <p className="text-sm text-slate-600">Frequently used administrative tasks</p>
           </div>
 
           <div className="space-y-3">
-            <Button variant="secondary" className="w-full justify-start">
+            <Button 
+              variant="secondary" 
+              className="w-full justify-start hover:bg-slate-100 transition-colors"
+              onClick={() => window.location.href = '/students'}
+            >
               <ApperIcon name="UserPlus" size={16} className="mr-3" />
               Enroll New Student
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button 
+              variant="secondary" 
+              className="w-full justify-start hover:bg-slate-100 transition-colors"
+              onClick={() => window.location.href = '/attendance'}
+            >
               <ApperIcon name="Calendar" size={16} className="mr-3" />
               Mark Today's Attendance
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button 
+              variant="secondary" 
+              className="w-full justify-start hover:bg-slate-100 transition-colors"
+              onClick={() => window.location.href = '/grades'}
+            >
               <ApperIcon name="GraduationCap" size={16} className="mr-3" />
               Enter Grades
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button 
+              variant="secondary" 
+              className="w-full justify-start hover:bg-slate-100 transition-colors"
+              onClick={() => window.location.href = '/reports'}
+            >
               <ApperIcon name="FileBarChart" size={16} className="mr-3" />
               Generate Reports
             </Button>
-            <Button variant="secondary" className="w-full justify-start">
+            <Button 
+              variant="secondary" 
+              className="w-full justify-start hover:bg-slate-100 transition-colors"
+              onClick={() => window.location.href = '/announcements'}
+            >
               <ApperIcon name="Megaphone" size={16} className="mr-3" />
               Create Announcement
             </Button>
