@@ -30,19 +30,23 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, o
     return matchesSearch && matchesGrade && matchesClass;
   });
 
-  const sortedStudents = [...filteredStudents].sort((a, b) => {
+const sortedStudents = [...filteredStudents].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
     
     if (sortField === "name") {
-      aValue = `${a.firstName} ${a.lastName}`;
-      bValue = `${b.firstName} ${b.lastName}`;
+      aValue = `${a.firstName || ''} ${a.lastName || ''}`;
+      bValue = `${b.firstName || ''} ${b.lastName || ''}`;
     }
     
+    // Handle null/undefined values safely
+    const safeAValue = aValue == null ? '' : String(aValue);
+    const safeBValue = bValue == null ? '' : String(bValue);
+    
     if (sortDirection === "asc") {
-      return aValue.localeCompare(bValue);
+      return safeAValue.localeCompare(safeBValue);
     } else {
-      return bValue.localeCompare(aValue);
+      return safeBValue.localeCompare(safeAValue);
     }
   });
 
