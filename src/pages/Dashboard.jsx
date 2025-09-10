@@ -335,231 +335,228 @@ const Dashboard = () => {
 </Card>
 
       {/* Student Enrollment Modal */}
-      {showEnrollModal && <StudentEnrollModal />}
+{showEnrollModal && <StudentEnrollModal />}
     </div>
   );
-};
 
-// Student Enrollment Modal Component
-function StudentEnrollModal() {
-  const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState([]);
+  function StudentEnrollModal() {
+    const [enrollLoading, setEnrollLoading] = useState(false);
+    const [classes, setClasses] = useState([]);
 
-  // Load classes for dropdown
-  useEffect(() => {
-    const loadClasses = async () => {
+    // Load classes for dropdown
+    useEffect(() => {
+      const loadClasses = async () => {
+        try {
+          const classData = await classService.getAll();
+          setClasses(classData);
+        } catch (error) {
+          console.error('Failed to load classes:', error);
+        }
+      };
+      loadClasses();
+    }, []);
+
+    const handleEnrollInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    };
+
+    const validateEnrollForm = () => {
+      if (!formData.first_name_c.trim()) {
+        toast.error('First name is required');
+        return false;
+      }
+      if (!formData.last_name_c.trim()) {
+        toast.error('Last name is required');
+        return false;
+      }
+      if (!formData.enrollment_date_c) {
+        toast.error('Enrollment date is required');
+        return false;
+      }
+      return true;
+    };
+
+    const handleEnrollSubmit = async (e) => {
+      e.preventDefault();
+      
+      if (!validateEnrollForm()) {
+        return;
+      }
+
+      setEnrollLoading(true);
       try {
-        const classData = await classService.getAll();
-        setClasses(classData);
+        await studentService.create(formData);
+        toast.success('Student enrolled successfully!');
+        
+        // Reset form and close modal
+        setFormData({
+          first_name_c: '',
+          last_name_c: '',
+          email_c: '',
+          phone_c: '',
+          date_of_birth_c: '',
+          address_c: '',
+          class_id_c: '',
+          class_name_c: '',
+          enrollment_date_c: new Date().toISOString().split('T')[0],
+          parent_contact_c: '',
+          previous_school_name_c: ''
+        });
+        setShowEnrollModal(false);
+        
+        // Refresh dashboard data to reflect new enrollment
+        loadDashboardData();
       } catch (error) {
-        console.error('Failed to load classes:', error);
+        console.error('Failed to enroll student:', error);
+        toast.error(error.message || 'Failed to enroll student');
+      } finally {
+        setEnrollLoading(false);
       }
     };
-    loadClasses();
-  }, []);
 
-  const handleEnrollInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const validateEnrollForm = () => {
-    if (!formData.first_name_c.trim()) {
-      toast.error('First name is required');
-      return false;
-    }
-    if (!formData.last_name_c.trim()) {
-      toast.error('Last name is required');
-      return false;
-    }
-    if (!formData.enrollment_date_c) {
-      toast.error('Enrollment date is required');
-      return false;
-    }
-    return true;
-  };
-
-  const handleEnrollSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateEnrollForm()) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await studentService.create(formData);
-      toast.success('Student enrolled successfully!');
-      
-      // Reset form and close modal
-      setFormData({
-        first_name_c: '',
-        last_name_c: '',
-        email_c: '',
-        phone_c: '',
-        date_of_birth_c: '',
-        address_c: '',
-        class_id_c: '',
-        class_name_c: '',
-        enrollment_date_c: new Date().toISOString().split('T')[0],
-        parent_contact_c: '',
-        previous_school_name_c: ''
-      });
-      setShowEnrollModal(false);
-      
-      // Refresh dashboard data to reflect new enrollment
-      loadDashboardData();
-    } catch (error) {
-      console.error('Failed to enroll student:', error);
-      toast.error(error.message || 'Failed to enroll student');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!showEnrollModal) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Enroll New Student</h2>
-            <button
-              onClick={() => setShowEnrollModal(false)}
-              className="p-2 hover:bg-gray-100 rounded-full"
-              disabled={loading}
-            >
-              <ApperIcon name="X" size={20} />
-            </button>
-          </div>
-        </div>
-        
-        <form onSubmit={handleEnrollSubmit} className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              label="First Name"
-              name="first_name_c"
-              value={formData.first_name_c}
-              onChange={handleEnrollInputChange}
-              required
-              disabled={loading}
-            />
-            <FormField
-              label="Last Name"
-              name="last_name_c"
-              value={formData.last_name_c}
-              onChange={handleEnrollInputChange}
-              required
-              disabled={loading}
-            />
-            <FormField
-              label="Email"
-              name="email_c"
-              type="email"
-              value={formData.email_c}
-              onChange={handleEnrollInputChange}
-              disabled={loading}
-            />
-            <FormField
-              label="Phone"
-              name="phone_c"
-              value={formData.phone_c}
-              onChange={handleEnrollInputChange}
-              disabled={loading}
-            />
-            <FormField
-              label="Date of Birth"
-              name="date_of_birth_c"
-              type="date"
-              value={formData.date_of_birth_c}
-              onChange={handleEnrollInputChange}
-              disabled={loading}
-            />
-            <FormField
-              label="Enrollment Date"
-              name="enrollment_date_c"
-              type="date"
-              value={formData.enrollment_date_c}
-              onChange={handleEnrollInputChange}
-              required
-              disabled={loading}
-            />
-            <FormField
-              label="Parent Contact"
-              name="parent_contact_c"
-              value={formData.parent_contact_c}
-              onChange={handleEnrollInputChange}
-              disabled={loading}
-            />
-            <FormField
-              label="Previous School"
-              name="previous_school_name_c"
-              value={formData.previous_school_name_c}
-              onChange={handleEnrollInputChange}
-              disabled={loading}
-            />
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Enroll New Student</h2>
+              <button
+                onClick={() => setShowEnrollModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+                disabled={enrollLoading}
+              >
+                <ApperIcon name="X" size={20} />
+              </button>
+            </div>
           </div>
           
-          <div className="mt-4">
-            <FormField
-              label="Address"
-              name="address_c"
-              as="textarea"
-              value={formData.address_c}
-              onChange={handleEnrollInputChange}
-              rows="3"
-              disabled={loading}
-            />
-          </div>
-
-          {classes.length > 0 && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Class (Optional)
-              </label>
-              <select
-                name="class_id_c"
-                value={formData.class_id_c}
+          <form onSubmit={handleEnrollSubmit} className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                label="First Name"
+                name="first_name_c"
+                value={formData.first_name_c}
                 onChange={handleEnrollInputChange}
-                disabled={loading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
-              >
-                <option value="">Select a class</option>
-                {classes.map(cls => (
-                  <option key={cls.Id} value={cls.Id}>
-                    {cls.name_c} - {cls.section_c} (Grade {cls.grade_c})
-                  </option>
-                ))}
-              </select>
+                required
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Last Name"
+                name="last_name_c"
+                value={formData.last_name_c}
+                onChange={handleEnrollInputChange}
+                required
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Email"
+                name="email_c"
+                type="email"
+                value={formData.email_c}
+                onChange={handleEnrollInputChange}
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Phone"
+                name="phone_c"
+                value={formData.phone_c}
+                onChange={handleEnrollInputChange}
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Date of Birth"
+                name="date_of_birth_c"
+                type="date"
+                value={formData.date_of_birth_c}
+                onChange={handleEnrollInputChange}
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Enrollment Date"
+                name="enrollment_date_c"
+                type="date"
+                value={formData.enrollment_date_c}
+                onChange={handleEnrollInputChange}
+                required
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Parent Contact"
+                name="parent_contact_c"
+                value={formData.parent_contact_c}
+                onChange={handleEnrollInputChange}
+                disabled={enrollLoading}
+              />
+              <FormField
+                label="Previous School"
+                name="previous_school_name_c"
+                value={formData.previous_school_name_c}
+                onChange={handleEnrollInputChange}
+                disabled={enrollLoading}
+              />
             </div>
-          )}
+            
+            <div className="mt-4">
+              <FormField
+                label="Address"
+                name="address_c"
+                as="textarea"
+                value={formData.address_c}
+                onChange={handleEnrollInputChange}
+                rows="3"
+                disabled={enrollLoading}
+              />
+            </div>
 
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setShowEnrollModal(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              {loading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
-              {loading ? 'Enrolling...' : 'Enroll Student'}
-            </Button>
-          </div>
-        </form>
+            {classes.length > 0 && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class (Optional)
+                </label>
+                <select
+                  name="class_id_c"
+                  value={formData.class_id_c}
+                  onChange={handleEnrollInputChange}
+                  disabled={enrollLoading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+                >
+                  <option value="">Select a class</option>
+                  {classes.map(cls => (
+                    <option key={cls.Id} value={cls.Id}>
+                      {cls.name_c} - {cls.section_c} (Grade {cls.grade_c})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowEnrollModal(false)}
+                disabled={enrollLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={enrollLoading}
+                className="flex items-center gap-2"
+              >
+                {enrollLoading && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>}
+                {enrollLoading ? 'Enrolling...' : 'Enroll Student'}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default Dashboard;
