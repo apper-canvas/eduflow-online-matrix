@@ -54,21 +54,21 @@ const [teachers, setTeachers] = useState([]);
 const filteredTeachers = teachers.filter(teacher => {
     // Search filter
     const matchesSearch = !searchTerm || 
-      `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subjects.some(subject => subject.toLowerCase().includes(searchTerm.toLowerCase()));
+      `${teacher.first_name_c || ''} ${teacher.last_name_c || ''}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (teacher.email_c || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (teacher.subjects_c || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     // Department filter
-    const matchesDepartment = !filters.department || teacher.department === filters.department;
+    const matchesDepartment = !filters.department || (teacher.department_c === filters.department);
 
-    // Subject filter
-    const matchesSubject = !filters.subject || teacher.subjects.includes(filters.subject);
+    // Subject filter - check if subjects_c contains the filter term
+    const matchesSubject = !filters.subject || (teacher.subjects_c || '').includes(filters.subject);
 
     return matchesSearch && matchesDepartment && matchesSubject;
   });
 
 const handleEdit = (teacher) => {
-    toast.info(`Edit teacher: ${teacher.firstName} ${teacher.lastName}`);
+    toast.info(`Edit teacher: ${teacher.first_name_c || 'Unknown'} ${teacher.last_name_c || 'Unknown'}`);
   };
 
   async function handleDelete(teacherId) {
@@ -85,8 +85,8 @@ const handleEdit = (teacher) => {
     }
   }
 
-  const handleView = (teacher) => {
-    toast.info(`View teacher profile: ${teacher.firstName} ${teacher.lastName}`);
+const handleView = (teacher) => {
+    toast.info(`View teacher profile: ${teacher.first_name_c || 'Unknown'} ${teacher.last_name_c || 'Unknown'}`);
   };
 
   const openAddTeacherModal = () => {
@@ -184,8 +184,8 @@ const handleEdit = (teacher) => {
             filters={filters}
             onFiltersChange={setFilters}
             filterOptions={{
-              department: [...new Set(teachers.map(t => t.department).filter(Boolean))].sort(),
-              subject: [...new Set(teachers.flatMap(t => t.subjects).filter(Boolean))].sort()
+department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort(),
+              subject: [...new Set(teachers.map(t => (t.subjects_c || '').split('\n')).flat().filter(Boolean))].sort()
             }}
             resultCount={filteredTeachers.length}
           />
@@ -213,15 +213,15 @@ const handleEdit = (teacher) => {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-semibold text-primary-700">
-                      {teacher.firstName[0]}{teacher.lastName[0]}
+<span className="text-lg font-semibold text-primary-700">
+                      {teacher.first_name_c?.[0] || 'T'}{teacher.last_name_c?.[0] || 'U'}
                     </span>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">
-                      {teacher.firstName} {teacher.lastName}
+{teacher.first_name_c || 'Unknown'} {teacher.last_name_c || 'Unknown'}
                     </h3>
-                    <p className="text-sm text-slate-600">{teacher.email}</p>
+                    <p className="text-sm text-slate-600">{teacher.email_c || 'No email'}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -255,31 +255,31 @@ const handleEdit = (teacher) => {
               <div className="space-y-3 mb-4">
                 <div className="flex items-center space-x-2">
                   <ApperIcon name="IdCard" size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-700">ID: {teacher.employeeId}</span>
+<span className="text-sm text-slate-700">ID: {teacher.employee_id_c || 'N/A'}</span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <ApperIcon name="Phone" size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-700">{teacher.phone}</span>
+<span className="text-sm text-slate-700">{teacher.phone_c || 'No phone'}</span>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   <ApperIcon name="Building" size={16} className="text-slate-500" />
-                  <Badge variant={getDepartmentColor(teacher.department)}>
-                    {teacher.department}
+<Badge variant={getDepartmentColor(teacher.department_c)}>
+                    {teacher.department_c || 'No department'}
                   </Badge>
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <ApperIcon name="Calendar" size={16} className="text-slate-500" />
-                  <span className="text-sm text-slate-700">{teacher.experience} years experience</span>
+<ApperIcon name="Calendar" size={16} className="text-slate-500" />
+                  <span className="text-sm text-slate-700">{teacher.experience_c || 0} years experience</span>
                 </div>
               </div>
 
               <div className="mb-4">
                 <p className="text-sm font-medium text-slate-700 mb-2">Subjects:</p>
                 <div className="flex flex-wrap gap-1">
-                  {teacher.subjects.map((subject, index) => (
+{(teacher.subjects_c || '').split('\n').filter(Boolean).map((subject, index) => (
                     <Badge key={index} variant="default" className="text-xs">
                       {subject}
                     </Badge>
@@ -290,7 +290,7 @@ const handleEdit = (teacher) => {
               <div className="mb-4">
                 <p className="text-sm font-medium text-slate-700 mb-2">Classes Assigned:</p>
                 <div className="flex flex-wrap gap-1">
-                  {teacher.classesAssigned.map((classId, index) => (
+{(teacher.classes_assigned_c || '').split('\n').filter(Boolean).map((classId, index) => (
                     <Badge key={index} variant="info" className="text-xs">
                       {classId}
                     </Badge>
