@@ -11,19 +11,41 @@ const FormField = ({
   className, 
   children,
   options,
+  onCustomAction,
+  customActionLabel,
   ...props 
 }) => {
   return (
     <div className={cn("space-y-1.5", className)}>
       {label && <Label>{label}</Label>}
-      {type === "select" ? (
-        <Select error={error} {...props}>
+{type === "select" ? (
+        <Select 
+          error={error} 
+          {...props}
+          onChange={(e) => {
+            if (e.target.value === '__custom_action__' && onCustomAction) {
+              onCustomAction();
+              // Reset the select to empty
+              e.target.value = '';
+            } else {
+              props.onChange?.(e);
+            }
+          }}
+        >
           <option value="">Select an option</option>
           {options?.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
+          {onCustomAction && customActionLabel && (
+            <option 
+              value="__custom_action__" 
+              className="font-medium text-primary-600 border-t border-slate-200"
+            >
+              + {customActionLabel}
+            </option>
+          )}
           {children}
         </Select>
       ) : (

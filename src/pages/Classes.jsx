@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { classService } from "@/services/api/classService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import ClassForm from "@/components/organisms/ClassForm";
 import ApperIcon from "@/components/ApperIcon";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
@@ -10,16 +9,19 @@ import Loading from "@/components/ui/Loading";
 import AdvancedFilters from "@/components/molecules/AdvancedFilters";
 import SearchBar from "@/components/molecules/SearchBar";
 import Button from "@/components/atoms/Button";
+import ClassForm from "@/components/organisms/ClassForm";
 import ClassCard from "@/components/organisms/ClassCard";
+import SubjectForm from "@/components/organisms/SubjectForm";
 
 const Classes = () => {
 const [classes, setClasses] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({});
   const [showClassForm, setShowClassForm] = useState(false);
+  const [showSubjectForm, setShowSubjectForm] = useState(false);
   const loadClasses = async () => {
     try {
       setLoading(true);
@@ -90,7 +92,7 @@ const handleManageStudents = (classData) => {
     });
   };
 
-  const handleCreateClass = () => {
+const handleCreateClass = () => {
     setShowClassForm(true);
   };
 
@@ -98,11 +100,43 @@ const handleManageStudents = (classData) => {
     setShowClassForm(false);
   };
 
+  const handleCloseSubjectForm = () => {
+    setShowSubjectForm(false);
+  };
+
+  const handleCreateSubject = () => {
+    setShowSubjectForm(true);
+  };
+
   const handleFormSubmit = async (formData) => {
     try {
       await classService.create(formData);
       await loadClasses(); // Refresh the classes list
       setShowClassForm(false);
+    } catch (error) {
+      throw error; // Re-throw to let form handle the error display
+    }
+  };
+
+  const handleSubjectSubmit = async (subjectData) => {
+    try {
+      // For now, we'll create a simple class with the new subject
+      // This could be enhanced to manage subjects separately if needed
+      const newClassData = {
+        class_id_c: `SUBJ-${Date.now()}`,
+        name_c: `${subjectData.name} Class`,
+        section_c: 'A',
+        grade_c: 1,
+        academic_year_c: new Date().getFullYear() + '-' + (new Date().getFullYear() + 1),
+        subjects_c: subjectData.name,
+        capacity_c: 30,
+        student_count_c: 0
+      };
+      
+      await classService.create(newClassData);
+      await loadClasses(); // Refresh the classes list to show new subject
+      setShowSubjectForm(false);
+      toast.success(`Subject "${subjectData.name}" added successfully!`);
     } catch (error) {
       throw error; // Re-throw to let form handle the error display
     }
@@ -148,7 +182,7 @@ return (
             </div>
           </div>
 
-          <AdvancedFilters
+<AdvancedFilters
             filters={filters}
             onFiltersChange={setFilters}
             filterOptions={{
@@ -156,6 +190,7 @@ return (
               subject: [...new Set(classes.map(c => c.subject).filter(Boolean))].sort()
             }}
             resultCount={filteredClasses.length}
+            onCreateSubject={handleCreateSubject}
           />
 
           {filteredClasses.length === 0 ? (
@@ -195,10 +230,17 @@ return (
         </div>
       </div>
 
-      <ClassForm
+<ClassForm
         isOpen={showClassForm}
         onClose={handleCloseForm}
         onSuccess={handleFormSubmit}
+      />
+
+      {/* Subject Creation Form */}
+      <SubjectForm
+        isOpen={showSubjectForm}
+        onClose={handleCloseSubjectForm}
+        onSuccess={handleSubjectSubmit}
       />
     </>
   );
