@@ -89,17 +89,17 @@ const getRecentAttendance = () => {
     // Apply date range filter
     if (dateRange.startDate) {
       filtered = filtered.filter(record => 
-        new Date(record.date) >= new Date(dateRange.startDate)
+        new Date(record.date_c) >= new Date(dateRange.startDate)
       );
     }
     if (dateRange.endDate) {
       filtered = filtered.filter(record => 
-        new Date(record.date) <= new Date(dateRange.endDate)
+        new Date(record.date_c) <= new Date(dateRange.endDate)
       );
     }
 
     return filtered
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .sort((a, b) => new Date(b.date_c) - new Date(a.date_c))
       .slice(0, 10);
   };
 
@@ -311,12 +311,12 @@ const getRecentAttendance = () => {
                           <ApperIcon name="User" size={12} className="text-primary-600" />
                         </div>
                         <span className="text-sm font-medium text-slate-900">
-                          Student ID: {record.studentId}
+{record.student_id_c?.Name || `Student ID: ${record.student_id_c || 'N/A'}`}
                         </span>
                       </div>
                     </td>
-                    <td className="p-3">
-                      <span className="text-sm text-slate-900">{record.classId}</span>
+<td className="p-3">
+                      <span className="text-sm text-slate-900">{record.class_id_c?.Name || record.class_id_c || 'N/A'}</span>
                     </td>
                     <td className="p-3">
                       <Badge variant={getStatusBadgeVariant(record.status)}>
