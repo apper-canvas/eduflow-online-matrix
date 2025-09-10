@@ -14,18 +14,30 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, o
   const [filters, setFilters] = useState({});
 
   // Apply search and filters
-  const filteredStudents = students.filter(student => {
-    // Search filter
+const filteredStudents = students.filter(student => {
+    // Ensure student object exists and has basic properties
+    if (!student || typeof student !== 'object') {
+      console.warn('Invalid student object found:', student);
+      return false;
+    }
+
+    // Search filter with null safety
+    const fullName = `${student.firstName || ''} ${student.lastName || ''}`.trim();
+    const email = student.email || '';
+    const studentId = student.Id?.toString() || '';
+    
     const matchesSearch = !searchTerm || 
-`${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.Id?.toString().includes(searchTerm);
+      fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      studentId.includes(searchTerm);
 
     // Grade filter
     const matchesGrade = !filters.grade || student.grade?.toString() === filters.grade;
 
-    // Class filter
-    const matchesClass = !filters.class || student.classId === filters.class;
+    // Class filter - handle both classId and className
+    const matchesClass = !filters.class || 
+      student.classId === filters.class ||
+      student.className === filters.class;
 
     return matchesSearch && matchesGrade && matchesClass;
   });
@@ -171,32 +183,40 @@ key={student.Id}
                   index % 2 === 0 ? "bg-white" : "bg-slate-50/30"
                 )}
               >
-                <td className="p-4">
+<td className="p-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
 <span className="text-sm font-medium text-primary-700">
-{student.firstName?.[0] || '?'}{student.lastName?.[0] || '?'}
+{(student.firstName?.[0] || '').toUpperCase()}{(student.lastName?.[0] || '').toUpperCase() || (student.firstName?.[1] || '?').toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900">
-{student.firstName} {student.lastName}
+{`${student.firstName || ''} ${student.lastName || ''}`.trim() || 'Unknown Student'}
                       </p>
-                      <p className="text-sm text-slate-600">{student.phone}</p>
+                      <p className="text-sm text-slate-600">{student.phone || 'No phone'}</p>
                     </div>
                   </div>
                 </td>
-                <td className="p-4">
-<span className="text-sm text-slate-900">{student.email}</span>
+<td className="p-4">
+<span className="text-sm text-slate-900">{student.email || 'No email provided'}</span>
                 </td>
                 <td className="p-4">
 <Badge variant={getClassBadgeVariant(student.className)}>
-                    {student.className}
+                    {student.className || 'No Class Assigned'}
                   </Badge>
                 </td>
                 <td className="p-4">
 <span className="text-sm text-slate-600">
-                    {new Date(student.enrollmentDate).toLocaleDateString()}
+                    {student.enrollmentDate ? 
+                      (() => {
+                        try {
+                          return new Date(student.enrollmentDate).toLocaleDateString();
+                        } catch (e) {
+                          return 'Invalid date';
+                        }
+                      })()
+                      : 'Not specified'}
                   </span>
                 </td>
                 <td className="p-4">
@@ -233,13 +253,18 @@ onClick={() => onDelete && onDelete(student.Id)}
         </table>
       </div>
 
-      {sortedStudents.length === 0 && (
+{sortedStudents.length === 0 && (
         <div className="text-center py-8">
           <ApperIcon name="Users" size={48} className="text-slate-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">No students found</h3>
           <p className="text-slate-600">
             {searchTerm ? "Try adjusting your search terms" : "Start by adding your first student"}
           </p>
+          {students.length > 0 && (
+            <p className="text-sm text-slate-500 mt-2">
+              {students.length} total students available (filtered out by current search/filters)
+            </p>
+          )}
         </div>
       )}
     </Card>

@@ -32,27 +32,39 @@ async getAll() {
       const response = await apperClient.fetchRecords(tableName, params);
       
       if (!response.success) {
-        console.error(response.message);
+        console.error("Failed to fetch students:", response.message);
         throw new Error(response.message);
       }
 
-      // Transform database field names to camelCase for UI consistency
-      const transformedData = (response.data || []).map(student => ({
-        Id: student.Id,
-        Name: student.Name,
-        firstName: student.first_name_c,
-        lastName: student.last_name_c,
-        email: student.email_c,
-        phone: student.phone_c,
-        dateOfBirth: student.date_of_birth_c,
-        address: student.address_c,
-        classId: student.class_id_c,
-        className: student.class_name_c,
-        enrollmentDate: student.enrollment_date_c,
-        photo: student.photo_c,
-        parentContact: student.parent_contact_c
-      }));
+      console.log(`Successfully fetched ${response.data?.length || 0} students from database`);
 
+      // Transform database field names to camelCase for UI consistency with validation
+      const transformedData = (response.data || []).map(student => {
+        const transformed = {
+          Id: student.Id || 0,
+          Name: student.Name || `${student.first_name_c || ''} ${student.last_name_c || ''}`.trim() || 'Unknown Student',
+          firstName: student.first_name_c || '',
+          lastName: student.last_name_c || '',
+          email: student.email_c || '',
+          phone: student.phone_c || '',
+          dateOfBirth: student.date_of_birth_c || '',
+          address: student.address_c || '',
+          classId: student.class_id_c || null,
+          className: student.class_name_c || 'No Class Assigned',
+          enrollmentDate: student.enrollment_date_c || new Date().toISOString().split('T')[0],
+          photo: student.photo_c || '',
+          parentContact: student.parent_contact_c || ''
+        };
+        
+        // Debug log for students with missing critical data
+        if (!transformed.firstName && !transformed.lastName) {
+          console.warn(`Student ID ${transformed.Id} has no name data:`, student);
+        }
+        
+        return transformed;
+      });
+
+      console.log(`Transformed student data sample:`, transformedData[0]);
       return transformedData;
     } catch (error) {
       console.error("Error fetching students:", error?.response?.data?.message || error);
@@ -60,7 +72,7 @@ async getAll() {
     }
   },
 
-  async getById(id) {
+async getById(id) {
 try {
       const params = {
         fields: [
@@ -83,28 +95,37 @@ try {
       const response = await apperClient.getRecordById(tableName, parseInt(id), params);
       
       if (!response.success) {
-        console.error(response.message);
+        console.error("Failed to fetch student by ID:", response.message);
         throw new Error(response.message);
       }
 
-      // Transform database field names to camelCase for UI consistency
+      console.log(`Successfully fetched student ID ${id}:`, response.data);
+
+      // Transform database field names to camelCase for UI consistency with validation
       const student = response.data;
       if (student) {
-        return {
-          Id: student.Id,
-          Name: student.Name,
-          firstName: student.first_name_c,
-          lastName: student.last_name_c,
-          email: student.email_c,
-          phone: student.phone_c,
-          dateOfBirth: student.date_of_birth_c,
-          address: student.address_c,
-          classId: student.class_id_c,
-          className: student.class_name_c,
-          enrollmentDate: student.enrollment_date_c,
-          photo: student.photo_c,
-          parentContact: student.parent_contact_c
+        const transformed = {
+          Id: student.Id || 0,
+          Name: student.Name || `${student.first_name_c || ''} ${student.last_name_c || ''}`.trim() || 'Unknown Student',
+          firstName: student.first_name_c || '',
+          lastName: student.last_name_c || '',
+          email: student.email_c || '',
+          phone: student.phone_c || '',
+          dateOfBirth: student.date_of_birth_c || '',
+          address: student.address_c || '',
+          classId: student.class_id_c || null,
+          className: student.class_name_c || 'No Class Assigned',
+          enrollmentDate: student.enrollment_date_c || new Date().toISOString().split('T')[0],
+          photo: student.photo_c || '',
+          parentContact: student.parent_contact_c || ''
         };
+        
+        // Debug log for missing critical data
+        if (!transformed.firstName && !transformed.lastName) {
+          console.warn(`Student ID ${id} has no name data in database`);
+        }
+        
+        return transformed;
       }
       return null;
     } catch (error) {
