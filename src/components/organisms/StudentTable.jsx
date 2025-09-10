@@ -7,7 +7,7 @@ import AdvancedFilters from "@/components/molecules/AdvancedFilters";
 import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
 
-const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView }) => {
+const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, onAddStudent }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("firstName");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -78,7 +78,11 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView })
                 placeholder="Search by name, email, or ID..."
                 className="w-80"
               />
-              <Button variant="primary" className="whitespace-nowrap">
+<Button 
+                variant="primary" 
+                className="whitespace-nowrap"
+                onClick={onAddStudent}
+              >
                 <ApperIcon name="Plus" size={16} className="mr-2" />
                 Add Student
               </Button>
