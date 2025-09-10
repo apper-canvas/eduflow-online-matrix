@@ -68,21 +68,23 @@ const [formData, setFormData] = useState({
       dateOfBirth: '',
       address: '',
       classId: '',
-      parentContact: ''
+      parentContact: '',
+      marks: ''
     });
 
     // Update form data when editingStudent changes
 useEffect(() => {
       if (editingStudent) {
         setFormData({
-          firstName: editingStudent.firstName || '',
+firstName: editingStudent.firstName || '',
           lastName: editingStudent.lastName || '',
           email: editingStudent.email || '',
           phone: editingStudent.phone || '',
           dateOfBirth: editingStudent.dateOfBirth || '',
           address: editingStudent.address || '',
           classId: editingStudent.classId || '',
-          parentContact: editingStudent.parentContact || ''
+          parentContact: editingStudent.parentContact || '',
+          marks: editingStudent.marks || ''
         });
       }
     }, [editingStudent]);
@@ -148,7 +150,16 @@ useEffect(() => {
       if (!formData.parentContact.trim()) {
         errors.parentContact = 'Parent contact is required';
       }
-
+<FormField
+              label="Marks"
+              type="number"
+              name="marks"
+              value={formData.marks}
+              onChange={handleInputChange}
+              placeholder="Enter marks"
+              min="0"
+              max="100"
+            />
       return errors;
     };
 
@@ -174,7 +185,7 @@ const className = classOptions.find(option => option.value === formData.classId)
           class_id_c: formData.classId,
           class_name_c: className,
           parent_contact_c: formData.parentContact
-        };
+};
         
         if (isEditMode) {
           await studentService.update(editingStudent.Id, studentData);
@@ -206,7 +217,8 @@ const handleCloseModal = () => {
         dateOfBirth: '',
         address: '',
         classId: '',
-        parentContact: ''
+parentContact: '',
+        marks: ''
       });
       setFormErrors({});
     };
@@ -304,7 +316,7 @@ const handleCloseModal = () => {
                 onChange={handleInputChange}
                 error={formErrors.parentContact}
                 placeholder="Parent Name - (555) 123-4567"
-              />
+/>
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button
