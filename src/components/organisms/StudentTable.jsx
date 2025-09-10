@@ -55,7 +55,17 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, o
     }
   };
 
-  const getClassBadgeVariant = (className) => {
+const getClassBadgeVariant = (className) => {
+    // Handle undefined, null, or invalid className values
+    if (!className || typeof className !== 'string') {
+      return "primary";
+    }
+    
+    // Check if className contains space before splitting
+    if (!className.includes(" ")) {
+      return "primary";
+    }
+    
     const classNumber = parseInt(className.split(" ")[1]) || 0;
     if (classNumber <= 5) return "primary";
     if (classNumber <= 8) return "info";
