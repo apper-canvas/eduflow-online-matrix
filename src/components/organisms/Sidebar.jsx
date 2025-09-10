@@ -73,8 +73,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
               <p className="text-xs text-slate-600 truncate">admin@school.edu</p>
             </div>
             <LogoutButton size="sm" />
-          </div>
-        </div>
+</div>
         </div>
       </div>
     </div>
@@ -159,8 +158,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 <p className="text-xs text-slate-600 truncate">admin@school.edu</p>
               </div>
               <LogoutButton size="sm" />
-            </div>
-          </div>
+</div>
           </div>
         </div>
       </div>
