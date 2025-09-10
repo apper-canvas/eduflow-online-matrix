@@ -21,9 +21,23 @@ const [teachers, setTeachers] = useState([]);
   const [filters, setFilters] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
+const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
+    Name: '',
+    teacher_id_c: '',
+    first_name_c: '',
+    last_name_c: '',
+    email_c: '',
+    phone_c: '',
+    subjects_c: '',
+    classes_assigned_c: '',
+    employee_id_c: '',
+    department_c: '',
+    experience_c: ''
+  });
+  const [editFormData, setEditFormData] = useState({
     Name: '',
     teacher_id_c: '',
     first_name_c: '',
@@ -71,7 +85,21 @@ const filteredTeachers = teachers.filter(teacher => {
   });
 
 const handleEdit = (teacher) => {
-    toast.info(`Edit teacher: ${teacher.first_name_c || 'Unknown'} ${teacher.last_name_c || 'Unknown'}`);
+    setSelectedTeacher(teacher);
+    setEditFormData({
+      Name: teacher.Name || '',
+      teacher_id_c: teacher.teacher_id_c || '',
+      first_name_c: teacher.first_name_c || '',
+      last_name_c: teacher.last_name_c || '',
+      email_c: teacher.email_c || '',
+      phone_c: teacher.phone_c || '',
+      subjects_c: teacher.subjects_c || '',
+      classes_assigned_c: teacher.classes_assigned_c || '',
+      employee_id_c: teacher.employee_id_c || '',
+      department_c: teacher.department_c || '',
+      experience_c: teacher.experience_c || ''
+    });
+    setShowEditModal(true);
   };
 
   async function handleDelete(teacherId) {
@@ -93,11 +121,29 @@ const handleView = (teacher) => {
     setShowViewModal(true);
   };
 
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setSelectedTeacher(null);
+    setEditFormData({
+      Name: '',
+      teacher_id_c: '',
+      first_name_c: '',
+      last_name_c: '',
+      email_c: '',
+      phone_c: '',
+      subjects_c: '',
+      classes_assigned_c: '',
+      employee_id_c: '',
+      department_c: '',
+      experience_c: ''
+    });
+  };
+
 const openAddTeacherModal = () => {
     setShowAddModal(true);
   };
 
-  const closeAddTeacherModal = () => {
+const closeAddTeacherModal = () => {
     setShowAddModal(false);
     setFormData({
       Name: '',
@@ -114,6 +160,14 @@ const openAddTeacherModal = () => {
     });
   };
 
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   const closeViewModal = () => {
     setShowViewModal(false);
     setSelectedTeacher(null);
@@ -127,7 +181,7 @@ const openAddTeacherModal = () => {
     }));
   };
 
-  const handleFormSubmit = async (e) => {
+const handleFormSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -139,6 +193,23 @@ const openAddTeacherModal = () => {
     } catch (error) {
       toast.error('Failed to add teacher');
       console.error('Error creating teacher:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await teacherService.update(selectedTeacher.Id, editFormData);
+      toast.success('Teacher updated successfully');
+      closeEditModal();
+      loadTeachers();
+    } catch (error) {
+      toast.error('Failed to update teacher');
+      console.error('Error updating teacher:', error);
     } finally {
       setSubmitting(false);
     }
@@ -329,7 +400,7 @@ department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort
           <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Add New Teacher</h2>
+<h2 className="text-xl font-bold text-gray-900">Add New Teacher</h2>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -509,7 +580,7 @@ department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort
                   variant="primary"
                   disabled={submitting}
                   className="min-w-[120px]"
-                >
+>
                   {submitting ? (
                     <>
                       <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
@@ -519,6 +590,211 @@ department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort
                     <>
                       <ApperIcon name="Plus" size={16} className="mr-2" />
                       Add Teacher
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Teacher Modal */}
+      {showEditModal && selectedTeacher && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-900">Edit Teacher</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={closeEditModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <ApperIcon name="X" size={20} />
+                </Button>
+              </div>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="Name"
+                    value={editFormData.Name}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teacher ID *
+                  </label>
+                  <input
+                    type="text"
+                    name="teacher_id_c"
+                    value={editFormData.teacher_id_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="first_name_c"
+                    value={editFormData.first_name_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="last_name_c"
+                    value={editFormData.last_name_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email_c"
+                    value={editFormData.email_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone_c"
+                    value={editFormData.phone_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Employee ID
+                  </label>
+                  <input
+                    type="text"
+                    name="employee_id_c"
+                    value={editFormData.employee_id_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    name="department_c"
+                    value={editFormData.department_c}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Experience (Years)
+                  </label>
+                  <input
+                    type="number"
+                    name="experience_c"
+                    value={editFormData.experience_c}
+                    onChange={handleEditInputChange}
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subjects (one per line)
+                </label>
+                <textarea
+                  name="subjects_c"
+                  value={editFormData.subjects_c}
+                  onChange={handleEditInputChange}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="Mathematics&#10;Physics&#10;Chemistry"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Classes Assigned (one per line)
+                </label>
+                <textarea
+                  name="classes_assigned_c"
+                  value={editFormData.classes_assigned_c}
+                  onChange={handleEditInputChange}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="Grade 10A&#10;Grade 11B&#10;Grade 12C"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={closeEditModal}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={submitting}
+                  className="min-w-[120px]"
+                >
+                  {submitting ? (
+                    <>
+                      <ApperIcon name="Loader2" size={16} className="mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <ApperIcon name="Edit" size={16} className="mr-2" />
+                      Update Teacher
                     </>
                   )}
                 </Button>
