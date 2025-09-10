@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from "react";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
-import SearchBar from "@/components/molecules/SearchBar";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
-import ApperIcon from "@/components/ApperIcon";
+import React, { useEffect, useState } from "react";
 import { teacherService } from "@/services/api/teacherService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
+import SearchBar from "@/components/molecules/SearchBar";
+import AdvancedFilters from "@/components/molecules/AdvancedFilters";
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
+import Button from "@/components/atoms/Button";
 import { cn } from "@/utils/cn";
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-
+const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
   const loadTeachers = async () => {
     try {
       setLoading(true);
@@ -35,11 +36,21 @@ const Teachers = () => {
     loadTeachers();
   }, []);
 
-  const filteredTeachers = teachers.filter(teacher =>
-    `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    teacher.subjects.some(subject => subject.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+const filteredTeachers = teachers.filter(teacher => {
+    // Search filter
+    const matchesSearch = !searchTerm || 
+      `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.subjects.some(subject => subject.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Department filter
+    const matchesDepartment = !filters.department || teacher.department === filters.department;
+
+    // Subject filter
+    const matchesSubject = !filters.subject || teacher.subjects.includes(filters.subject);
+
+    return matchesSearch && matchesDepartment && matchesSubject;
+  });
 
   const handleEdit = (teacher) => {
     toast.info(`Edit teacher: ${teacher.firstName} ${teacher.lastName}`);
@@ -91,17 +102,31 @@ const Teachers = () => {
             Manage faculty profiles, assignments, and academic responsibilities
           </p>
         </div>
-        <div className="flex items-center space-x-3">
-          <SearchBar
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search teachers..."
-            className="w-64"
+<div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <SearchBar
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name, email, or subject..."
+                className="w-80"
+              />
+              <Button variant="primary">
+                <ApperIcon name="Plus" size={16} className="mr-2" />
+                Add Teacher
+              </Button>
+            </div>
+          </div>
+
+          <AdvancedFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            filterOptions={{
+              department: [...new Set(teachers.map(t => t.department).filter(Boolean))].sort(),
+              subject: [...new Set(teachers.flatMap(t => t.subjects).filter(Boolean))].sort()
+            }}
+            resultCount={filteredTeachers.length}
           />
-          <Button variant="primary">
-            <ApperIcon name="Plus" size={16} className="mr-2" />
-            Add Teacher
-          </Button>
         </div>
       </div>
 

@@ -80,8 +80,9 @@ const Students = () => {
         </p>
       </div>
 
-      <StudentTable 
+<StudentTable 
         students={students}
+        classes={[]} // Will be enhanced when class data is needed
         onEdit={handleEdit}
         onDelete={handleDelete}
         onView={handleView}

@@ -3,18 +3,32 @@ import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
 import SearchBar from "@/components/molecules/SearchBar";
+import AdvancedFilters from "@/components/molecules/AdvancedFilters";
 import ApperIcon from "@/components/ApperIcon";
 import { cn } from "@/utils/cn";
 
-const StudentTable = ({ students = [], onEdit, onDelete, onView }) => {
+const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("firstName");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [filters, setFilters] = useState({});
 
-  const filteredStudents = students.filter(student =>
-    `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply search and filters
+  const filteredStudents = students.filter(student => {
+    // Search filter
+    const matchesSearch = !searchTerm || 
+      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentId?.toString().includes(searchTerm);
+
+    // Grade filter
+    const matchesGrade = !filters.grade || student.grade?.toString() === filters.grade;
+
+    // Class filter
+    const matchesClass = !filters.class || student.classId === filters.class;
+
+    return matchesSearch && matchesGrade && matchesClass;
+  });
 
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     let aValue = a[sortField];
@@ -55,17 +69,31 @@ const StudentTable = ({ students = [], onEdit, onDelete, onView }) => {
           <h2 className="text-lg font-semibold text-slate-900">Students</h2>
           <p className="text-sm text-slate-600">Manage student records and information</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <SearchBar
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search students..."
-            className="w-64"
+<div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <SearchBar
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name, email, or ID..."
+                className="w-80"
+              />
+              <Button variant="primary" className="whitespace-nowrap">
+                <ApperIcon name="Plus" size={16} className="mr-2" />
+                Add Student
+              </Button>
+            </div>
+          </div>
+
+          <AdvancedFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            filterOptions={{
+              grade: [...new Set(students.map(s => s.grade).filter(Boolean))].sort((a, b) => a - b),
+              class: classes
+            }}
+            resultCount={filteredStudents.length}
           />
-          <Button variant="primary" className="whitespace-nowrap">
-            <ApperIcon name="Plus" size={16} className="mr-2" />
-            Add Student
-          </Button>
         </div>
       </div>
 

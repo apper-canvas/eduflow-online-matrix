@@ -10,6 +10,33 @@ export const attendanceService = {
     return [...attendance];
   },
 
+  async getByDateRange(startDate, endDate) {
+    await delay(200);
+    return attendance.filter(record => {
+      const recordDate = new Date(record.date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+      
+      if (start && recordDate < start) return false;
+      if (end && recordDate > end) return false;
+      return true;
+    });
+  },
+
+  async getByClassAndDateRange(classId, startDate, endDate) {
+    await delay(200);
+    return attendance.filter(record => {
+      const recordDate = new Date(record.date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+      
+      const matchesClass = !classId || record.classId === classId;
+      const matchesDateRange = (!start || recordDate >= start) && (!end || recordDate <= end);
+      
+      return matchesClass && matchesDateRange;
+    });
+  },
+
   async getById(id) {
     await delay(200);
     const record = attendance.find(a => a.Id === parseInt(id));

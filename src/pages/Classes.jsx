@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
-import ClassCard from "@/components/organisms/ClassCard";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
-import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/ApperIcon";
+import React, { useEffect, useState, useMemo } from "react";
+import AdvancedFilters from "@/components/molecules/AdvancedFilters";
 import { classService } from "@/services/api/classService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
+import SearchBar from "@/components/molecules/SearchBar";
+import Button from "@/components/atoms/Button";
+import ClassCard from "@/components/organisms/ClassCard";
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({});
   const loadClasses = async () => {
     try {
       setLoading(true);
@@ -29,7 +32,38 @@ const Classes = () => {
 
   useEffect(() => {
     loadClasses();
-  }, []);
+}, []);
+
+  const filteredClasses = useMemo(() => {
+    let filtered = classes || [];
+
+    // Apply search filter
+    if (searchTerm?.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(classData => 
+        classData?.name?.toLowerCase().includes(search) ||
+        classData?.subject?.toLowerCase().includes(search) ||
+        classData?.section?.toLowerCase().includes(search)
+      );
+    }
+
+    // Apply advanced filters
+    if (filters && Object.keys(filters).length > 0) {
+      filtered = filtered.filter(classData => {
+        return Object.entries(filters).every(([key, value]) => {
+          if (!value || (Array.isArray(value) && value.length === 0)) {
+            return true;
+          }
+          if (Array.isArray(value)) {
+            return value.includes(classData?.[key]);
+          }
+          return classData?.[key] === value;
+        });
+      });
+    }
+
+    return filtered;
+  }, [classes, searchTerm, filters]);
 
   const handleEdit = (classData) => {
     toast.info(`Edit class: ${classData.name} - ${classData.section}`);
@@ -67,28 +101,67 @@ const Classes = () => {
           Create Class
         </Button>
       </div>
-
-      {classes.length === 0 ? (
-        <Empty 
-          title="No classes created"
-          description="Start organizing your school by creating your first class"
-          actionLabel="Create Class"
-          onAction={() => toast.info("Create class functionality would open here")}
-          icon="BookOpen"
-        />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {classes.map((classData) => (
-            <ClassCard
-              key={classData.Id}
-              classData={classData}
-              onEdit={handleEdit}
-              onView={handleView}
-              onManageStudents={handleManageStudents}
+<div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <SearchBar
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search classes by name or subject..."
+              className="w-80"
             />
-          ))}
+            <Button variant="primary">
+              <ApperIcon name="Plus" size={16} className="mr-2" />
+              Add Class
+            </Button>
+          </div>
         </div>
-      )}
+
+        <AdvancedFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          filterOptions={{
+            grade: [...new Set(classes.map(c => c.grade).filter(Boolean))].sort((a, b) => a - b),
+            subject: [...new Set(classes.map(c => c.subject).filter(Boolean))].sort()
+          }}
+          resultCount={filteredClasses.length}
+        />
+
+        {filteredClasses.length === 0 ? (
+          searchTerm || Object.keys(filters).some(key => filters[key]) ? (
+            <Empty 
+              title="No classes found"
+              description="Try adjusting your search or filter criteria"
+              actionLabel="Clear Filters"
+              onAction={() => {
+                setSearchTerm("");
+                setFilters({});
+              }}
+              icon="Search"
+            />
+          ) : (
+            <Empty 
+              title="No classes created"
+              description="Start organizing your school by creating your first class"
+              actionLabel="Create Class"
+              onAction={() => toast.info("Create class functionality would open here")}
+              icon="BookOpen"
+            />
+          )
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredClasses.map((classData) => (
+              <ClassCard
+                key={classData.Id}
+                classData={classData}
+                onEdit={handleEdit}
+                onView={handleView}
+                onManageStudents={handleManageStudents}
+              />
+            ))}
+          </div>
+        )}
+</div>
     </div>
   );
 };

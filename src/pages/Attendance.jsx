@@ -1,28 +1,33 @@
-import React, { useState, useEffect } from "react";
-import AttendanceGrid from "@/components/organisms/AttendanceGrid";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
-import FormField from "@/components/molecules/FormField";
-import Loading from "@/components/ui/Loading";
-import Error from "@/components/ui/Error";
-import Empty from "@/components/ui/Empty";
-import ApperIcon from "@/components/ApperIcon";
+import React, { useEffect, useState } from "react";
 import { classService } from "@/services/api/classService";
 import { studentService } from "@/services/api/studentService";
 import { attendanceService } from "@/services/api/attendanceService";
 import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Error from "@/components/ui/Error";
+import Empty from "@/components/ui/Empty";
+import Loading from "@/components/ui/Loading";
+import FormField from "@/components/molecules/FormField";
+import Badge from "@/components/atoms/Badge";
+import Select from "@/components/atoms/Select";
+import DateRangeFilter from "@/components/molecules/DateRangeFilter";
+import Card from "@/components/atoms/Card";
+import Button from "@/components/atoms/Button";
+import AttendanceGrid from "@/components/organisms/AttendanceGrid";
 
 const Attendance = () => {
   const [classes, setClasses] = useState([]);
-  const [students, setStudents] = useState([]);
+const [students, setStudents] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [dateRange, setDateRange] = useState({
+    startDate: "",
+    endDate: ""
+  });
   const [loading, setLoading] = useState(true);
   const [studentsLoading, setStudentsLoading] = useState(false);
   const [error, setError] = useState("");
-
   const loadInitialData = async () => {
     try {
       setLoading(true);
@@ -78,10 +83,31 @@ const Attendance = () => {
     }
   };
 
-  const getRecentAttendance = () => {
-    return attendanceRecords
+const getRecentAttendance = () => {
+    let filtered = attendanceRecords;
+
+    // Apply date range filter
+    if (dateRange.startDate) {
+      filtered = filtered.filter(record => 
+        new Date(record.date) >= new Date(dateRange.startDate)
+      );
+    }
+    if (dateRange.endDate) {
+      filtered = filtered.filter(record => 
+        new Date(record.date) <= new Date(dateRange.endDate)
+      );
+    }
+
+    return filtered
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 10);
+  };
+
+  const handleDateRangeChange = (field, value) => {
+    setDateRange(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const getStatusBadgeVariant = (status) => {
@@ -185,7 +211,7 @@ const Attendance = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full md:w-96">
-          <FormField
+<FormField
             label="Class"
             type="select"
             value={selectedClass}
@@ -204,6 +230,17 @@ const Attendance = () => {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
+<div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Filter Recent Records</h3>
+          <DateRangeFilter
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onStartDateChange={(e) => handleDateRangeChange("startDate", e.target.value)}
+            onEndDateChange={(e) => handleDateRangeChange("endDate", e.target.value)}
+            label="Filter by Date Range"
+            className="max-w-md"
           />
         </div>
       </Card>
@@ -235,7 +272,6 @@ const Attendance = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Recent Attendance</h2>
-            <p className="text-sm text-slate-600">Latest attendance records across all classes</p>
           </div>
           <Button variant="ghost" size="sm" className="text-primary-600 hover:text-primary-700">
             View All Records
