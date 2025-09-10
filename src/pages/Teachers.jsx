@@ -523,11 +523,10 @@ department: [...new Set(teachers.map(t => t.department_c).filter(Boolean))].sort
                   )}
                 </Button>
               </div>
-            </form>
+</form>
           </div>
-</div>
+        </div>
       )}
-      </div>
 
       {/* View Teacher Profile Modal */}
       {showViewModal && selectedTeacher && (
