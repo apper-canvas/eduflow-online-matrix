@@ -279,7 +279,7 @@ const getRecentAttendance = () => {
           </Button>
         </div>
 
-        {attendanceRecords.length === 0 ? (
+{getRecentAttendance().length === 0 ? (
           <Empty 
             title="No attendance records"
             description="Start tracking attendance by marking your first class"
