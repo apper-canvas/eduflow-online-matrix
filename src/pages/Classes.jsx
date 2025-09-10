@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { classService } from "@/services/api/classService";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ClassForm from "@/components/organisms/ClassForm";
 import ApperIcon from "@/components/ApperIcon";
@@ -13,6 +14,7 @@ import ClassCard from "@/components/organisms/ClassCard";
 
 const Classes = () => {
 const [classes, setClasses] = useState([]);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -75,8 +77,17 @@ const handleEdit = (classData) => {
     toast.info(`View class details: ${classData.name} - ${classData.section}`);
   };
 
-  const handleManageStudents = (classData) => {
-    toast.info(`Manage students for: ${classData.name} - ${classData.section}`);
+const handleManageStudents = (classData) => {
+    navigate('/students', { 
+      state: { 
+        filterByClass: {
+          id: classData.Id,
+          name: classData.name_c || classData.name,
+          section: classData.section_c || classData.section,
+          displayName: `${classData.name_c || classData.name} - ${classData.section_c || classData.section}`
+        }
+      }
+    });
   };
 
   const handleCreateClass = () => {

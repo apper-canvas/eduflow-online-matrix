@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { studentService } from "@/services/api/studentService";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Error from "@/components/ui/Error";
 import Empty from "@/components/ui/Empty";
@@ -10,15 +11,29 @@ import StudentTable from "@/components/organisms/StudentTable";
 const Students = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const [error, setError] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const classFilter = location.state?.filterByClass;
+
   const loadStudents = async () => {
     try {
       setLoading(true);
       setError("");
-      const data = await studentService.getAll();
-      setStudents(data);
+const data = await studentService.getAll();
+      let filteredData = data;
+      
+      // Filter by class if coming from Classes page
+      if (classFilter) {
+        filteredData = data.filter(student => {
+          const studentClassId = student.class_id_c?.Id || student.class_id_c;
+          return studentClassId === classFilter.id;
+        });
+      }
+      
+      setStudents(filteredData);
     } catch (error) {
       console.error("Error loading students:", error);
       setError(error.message || "Failed to load students");
@@ -29,14 +44,16 @@ const Students = () => {
 
   useEffect(() => {
     loadStudents();
-  }, []);
+  }, [classFilter]);
 
+  const handleClearClassFilter = () => {
+    navigate('/students');
+  };
 const handleEdit = (student) => {
-    setEditingStudent(student);
+setEditingStudent(student);
     setShowAddModal(true);
   };
-
-  const handleDelete = async (studentId) => {
+const handleDelete = async (studentId) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
         await studentService.delete(studentId);
@@ -47,7 +64,8 @@ const handleEdit = (student) => {
       }
     }
   };
-const handleAddStudent = () => {
+
+  const handleAddStudent = () => {
     setEditingStudent(null);
     setShowAddModal(true);
   };
@@ -55,7 +73,6 @@ const handleAddStudent = () => {
   const handleView = (student) => {
     toast.info(`View student details: ${student.firstName} ${student.lastName}`);
   };
-
 // Student Form Modal Component
   const StudentFormModal = () => {
     const isEditMode = editingStudent !== null;
@@ -93,7 +110,7 @@ marks: editingStudent.marks || '',
     const [formErrors, setFormErrors] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
-    const classOptions = [
+const classOptions = [
       { value: 'CLS001', label: 'Grade 9' },
       { value: 'CLS002', label: 'Grade 10' },
       { value: 'CLS003', label: 'Grade 11' },
@@ -380,8 +397,31 @@ className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 d
   }
 
 if (students.length === 0) {
+    const emptyTitle = classFilter 
+      ? `No students found in ${classFilter.displayName}`
+      : "No students enrolled";
+    const emptyDescription = classFilter
+      ? `There are no students currently enrolled in ${classFilter.displayName}. You can add students to this class or return to view all students.`
+      : "Start building your student database by enrolling your first student";
+
     return (
       <div>
+        {classFilter && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-blue-900">Viewing students in {classFilter.displayName}</h3>
+                <p className="text-sm text-blue-700 mt-1">Showing students enrolled in this class only</p>
+              </div>
+              <button
+                onClick={handleClearClassFilter}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+              >
+                View All Students
+              </button>
+            </div>
+          </div>
+        )}
         <Empty 
           title="No students enrolled"
           description="Start building your student database by enrolling your first student"
@@ -405,14 +445,44 @@ if (students.length === 0) {
         </p>
       </div>
 
-<StudentTable 
-        students={students}
-        classes={[]} // Will be enhanced when class data is needed
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onView={handleView}
-        onAddStudent={handleAddStudent}
-      />
+<div className="space-y-6">
+        <div className="mb-8">
+          {classFilter && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-blue-900">Managing students in {classFilter.displayName}</h3>
+                  <p className="text-sm text-blue-700 mt-1">Showing students enrolled in this class only</p>
+                </div>
+                <button
+                  onClick={handleClearClassFilter}
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                >
+                  View All Students
+                </button>
+              </div>
+            </div>
+          )}
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">
+            {classFilter ? `Students in ${classFilter.displayName}` : 'Student Management'}
+          </h1>
+          <p className="text-slate-600">
+            {classFilter 
+              ? `Manage students enrolled in ${classFilter.displayName}`
+              : 'Manage student enrollment, profiles, and academic records'
+            }
+          </p>
+        </div>
+
+        <StudentTable 
+          students={students}
+          classes={[]} // Will be enhanced when class data is needed
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onView={handleView}
+          onAddStudent={handleAddStudent}
+        />
+      </div>
       {showAddModal && <StudentFormModal />}
     </div>
   );
