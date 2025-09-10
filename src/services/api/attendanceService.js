@@ -1,139 +1,452 @@
-import attendanceData from "@/services/mockData/attendance.json";
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
-let attendance = [...attendanceData];
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const tableName = 'attendance_c';
 
 export const attendanceService = {
   async getAll() {
-    await delay(300);
-    return [...attendance];
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        orderBy: [{"fieldName": "Id", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getByDateRange(startDate, endDate) {
-    await delay(200);
-    return attendance.filter(record => {
-      const recordDate = new Date(record.date);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
+    try {
+      const whereConditions = [];
       
-      if (start && recordDate < start) return false;
-      if (end && recordDate > end) return false;
-      return true;
-    });
+      if (startDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "GreaterThanOrEqualTo", "Values": [startDate]});
+      }
+      if (endDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "LessThanOrEqualTo", "Values": [endDate]});
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        where: whereConditions,
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance by date range:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
-  async getByClassAndDateRange(classId, startDate, endDate) {
-    await delay(200);
-    return attendance.filter(record => {
-      const recordDate = new Date(record.date);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
+  async getByClassAndDateRange(class_id_c, startDate, endDate) {
+    try {
+      const whereConditions = [];
       
-      const matchesClass = !classId || record.classId === classId;
-      const matchesDateRange = (!start || recordDate >= start) && (!end || recordDate <= end);
+      if (class_id_c) {
+        whereConditions.push({"FieldName": "class_id_c", "Operator": "EqualTo", "Values": [parseInt(class_id_c)]});
+      }
+      if (startDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "GreaterThanOrEqualTo", "Values": [startDate]});
+      }
+      if (endDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "LessThanOrEqualTo", "Values": [endDate]});
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        where: whereConditions,
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
       
-      return matchesClass && matchesDateRange;
-    });
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance by class and date range:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getById(id) {
-    await delay(200);
-    const record = attendance.find(a => a.Id === parseInt(id));
-    if (!record) {
-      throw new Error("Attendance record not found");
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ]
+      };
+
+      const response = await apperClient.getRecordById(tableName, parseInt(id), params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching attendance record ${id}:`, error?.response?.data?.message || error);
+      throw error;
     }
-    return { ...record };
   },
 
   async getByStudentId(studentId) {
-    await delay(250);
-    return attendance.filter(a => a.studentId === parseInt(studentId)).map(a => ({ ...a }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        where: [{"FieldName": "student_id_c", "Operator": "EqualTo", "Values": [parseInt(studentId)]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance by student:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getByDate(date) {
-    await delay(250);
-    return attendance.filter(a => a.date === date).map(a => ({ ...a }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        where: [{"FieldName": "date_c", "Operator": "EqualTo", "Values": [date]}],
+        orderBy: [{"fieldName": "student_id_c", "sorttype": "ASC"}],
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance by date:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
-  async getByClassAndDate(classId, date) {
-    await delay(250);
-    return attendance.filter(a => a.classId === classId && a.date === date).map(a => ({ ...a }));
+  async getByClassAndDate(class_id_c, date) {
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "date_c"}},
+          {"field": {"Name": "status_c"}},
+          {"field": {"Name": "period_c"}}
+        ],
+        where: [
+          {"FieldName": "class_id_c", "Operator": "EqualTo", "Values": [parseInt(class_id_c)]},
+          {"FieldName": "date_c", "Operator": "EqualTo", "Values": [date]}
+        ],
+        orderBy: [{"fieldName": "student_id_c", "sorttype": "ASC"}],
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching attendance by class and date:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async createBatch(attendanceEntries) {
-    await delay(500);
-    const createdRecords = [];
-    
-    // Remove existing records for the same date and class first
-    const { classId, date } = attendanceEntries[0] || {};
-    if (classId && date) {
-      attendance = attendance.filter(a => !(a.classId === classId && a.date === date));
+    try {
+      // Remove existing records for the same date and class first if needed
+      const { class_id_c, date_c } = attendanceEntries[0] || {};
+      if (class_id_c && date_c) {
+        const existingRecords = await this.getByClassAndDate(class_id_c, date_c);
+        if (existingRecords.length > 0) {
+          const deleteParams = {
+            RecordIds: existingRecords.map(r => r.Id)
+          };
+          await apperClient.deleteRecord(tableName, deleteParams);
+        }
+      }
+
+      const records = attendanceEntries.map(attendanceData => ({
+        Name: `Attendance - ${attendanceData.date_c}`,
+        student_id_c: parseInt(attendanceData.student_id_c),
+        class_id_c: parseInt(attendanceData.class_id_c),
+        date_c: attendanceData.date_c,
+        status_c: attendanceData.status_c,
+        period_c: attendanceData.period_c || "All Day"
+      }));
+
+      const params = { records };
+
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.map(r => r.data);
+      }
+    } catch (error) {
+      console.error("Error creating attendance batch:", error?.response?.data?.message || error);
+      throw error;
     }
-    
-    for (const attendanceData of attendanceEntries) {
-      const highestId = Math.max(...attendance.map(a => a.Id), 0, ...createdRecords.map(a => a.Id));
-      const newRecord = {
-        ...attendanceData,
-        Id: highestId + 1 + createdRecords.length
-      };
-      attendance.push(newRecord);
-      createdRecords.push({ ...newRecord });
-    }
-    
-    return createdRecords;
   },
 
   async create(attendanceData) {
-    await delay(400);
-    const highestId = Math.max(...attendance.map(a => a.Id), 0);
-    const newRecord = {
-      ...attendanceData,
-      Id: highestId + 1
-    };
-    attendance.push(newRecord);
-    return { ...newRecord };
+    try {
+      const params = {
+        records: [{
+          Name: `Attendance - ${attendanceData.date_c}`,
+          student_id_c: parseInt(attendanceData.student_id_c),
+          class_id_c: parseInt(attendanceData.class_id_c),
+          date_c: attendanceData.date_c,
+          status_c: attendanceData.status_c,
+          period_c: attendanceData.period_c || "All Day"
+        }]
+      };
+
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating attendance record:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async update(id, attendanceData) {
-    await delay(350);
-    const index = attendance.findIndex(a => a.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Attendance record not found");
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: `Attendance - ${attendanceData.date_c}`,
+          student_id_c: parseInt(attendanceData.student_id_c),
+          class_id_c: parseInt(attendanceData.class_id_c),
+          date_c: attendanceData.date_c,
+          status_c: attendanceData.status_c,
+          period_c: attendanceData.period_c || "All Day"
+        }]
+      };
+
+      const response = await apperClient.updateRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating attendance record:", error?.response?.data?.message || error);
+      throw error;
     }
-    attendance[index] = { ...attendance[index], ...attendanceData, Id: parseInt(id) };
-    return { ...attendance[index] };
   },
 
   async delete(id) {
-    await delay(300);
-    const index = attendance.findIndex(a => a.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Attendance record not found");
+    try {
+      const params = { 
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await apperClient.deleteRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} attendance records:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0;
+      }
+    } catch (error) {
+      console.error("Error deleting attendance record:", error?.response?.data?.message || error);
+      throw error;
     }
-    attendance.splice(index, 1);
-    return true;
   },
 
   async getAttendanceStats(studentId, startDate, endDate) {
-    await delay(300);
-    const records = attendance.filter(a => 
-      a.studentId === parseInt(studentId) &&
-      a.date >= startDate &&
-      a.date <= endDate
-    );
-    
-    const stats = {
-      total: records.length,
-      present: records.filter(r => r.status === "Present").length,
-      absent: records.filter(r => r.status === "Absent").length,
-      late: records.filter(r => r.status === "Late").length,
-      excused: records.filter(r => r.status === "Excused").length
-    };
-    
-    stats.attendanceRate = stats.total > 0 ? 
-      Math.round(((stats.present + stats.late + stats.excused) / stats.total) * 100) : 0;
-    
-    return stats;
+    try {
+      const whereConditions = [
+        {"FieldName": "student_id_c", "Operator": "EqualTo", "Values": [parseInt(studentId)]}
+      ];
+      
+      if (startDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "GreaterThanOrEqualTo", "Values": [startDate]});
+      }
+      if (endDate) {
+        whereConditions.push({"FieldName": "date_c", "Operator": "LessThanOrEqualTo", "Values": [endDate]});
+      }
+
+      const params = {
+        fields: [
+          {"field": {"Name": "status_c"}}
+        ],
+        where: whereConditions,
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      const records = response.data || [];
+      
+      const stats = {
+        total: records.length,
+        present: records.filter(r => r.status_c === "Present").length,
+        absent: records.filter(r => r.status_c === "Absent").length,
+        late: records.filter(r => r.status_c === "Late").length,
+        excused: records.filter(r => r.status_c === "Excused").length
+      };
+      
+      stats.attendanceRate = stats.total > 0 ? 
+        Math.round(((stats.present + stats.late + stats.excused) / stats.total) * 100) : 0;
+      
+      return stats;
+    } catch (error) {
+      console.error("Error calculating attendance stats:", error?.response?.data?.message || error);
+      throw error;
+    }
   }
 };

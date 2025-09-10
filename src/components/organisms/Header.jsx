@@ -1,7 +1,7 @@
 import React from "react";
-import Button from "@/components/atoms/Button";
 import ApperIcon from "@/components/ApperIcon";
-
+import Button from "@/components/atoms/Button";
+import LogoutButton from "@/components/atoms/LogoutButton";
 const Header = ({ title, subtitle, onMenuToggle, showMenuToggle = true }) => {
   return (
     <header className="bg-white border-b border-slate-200 px-4 lg:px-6 py-4 shadow-sm">
@@ -36,8 +36,13 @@ const Header = ({ title, subtitle, onMenuToggle, showMenuToggle = true }) => {
               <ApperIcon name="User" size={16} className="text-white" />
             </div>
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-slate-900">Admin User</p>
-              <p className="text-xs text-slate-600">Administrator</p>
+<div className="flex items-center space-x-2">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">User Profile</p>
+                  <p className="text-xs text-slate-600">School Admin</p>
+                </div>
+                <LogoutButton />
+              </div>
             </div>
           </div>
         </div>

@@ -1,68 +1,281 @@
-import studentsData from "@/services/mockData/students.json";
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
-let students = [...studentsData];
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const tableName = 'student_c';
 
 export const studentService = {
   async getAll() {
-    await delay(300);
-    return [...students];
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "first_name_c"}},
+          {"field": {"Name": "last_name_c"}},
+          {"field": {"Name": "email_c"}},
+          {"field": {"Name": "phone_c"}},
+          {"field": {"Name": "date_of_birth_c"}},
+          {"field": {"Name": "address_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "class_name_c"}},
+          {"field": {"Name": "enrollment_date_c"}},
+          {"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}}
+        ],
+        orderBy: [{"fieldName": "Id", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching students:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getById(id) {
-    await delay(200);
-    const student = students.find(s => s.Id === parseInt(id));
-    if (!student) {
-      throw new Error("Student not found");
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "first_name_c"}},
+          {"field": {"Name": "last_name_c"}},
+          {"field": {"Name": "email_c"}},
+          {"field": {"Name": "phone_c"}},
+          {"field": {"Name": "date_of_birth_c"}},
+          {"field": {"Name": "address_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "class_name_c"}},
+          {"field": {"Name": "enrollment_date_c"}},
+          {"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}}
+        ]
+      };
+
+      const response = await apperClient.getRecordById(tableName, parseInt(id), params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching student ${id}:`, error?.response?.data?.message || error);
+      throw error;
     }
-    return { ...student };
   },
 
   async getByClassId(classId) {
-    await delay(250);
-    return students.filter(s => s.classId === classId).map(s => ({ ...s }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "first_name_c"}},
+          {"field": {"Name": "last_name_c"}},
+          {"field": {"Name": "email_c"}},
+          {"field": {"Name": "phone_c"}},
+          {"field": {"Name": "date_of_birth_c"}},
+          {"field": {"Name": "address_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "class_name_c"}},
+          {"field": {"Name": "enrollment_date_c"}},
+          {"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}}
+        ],
+        where: [{"FieldName": "class_id_c", "Operator": "EqualTo", "Values": [parseInt(classId)]}],
+        orderBy: [{"fieldName": "first_name_c", "sorttype": "ASC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching students by class:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async create(studentData) {
-    await delay(400);
-    const highestId = Math.max(...students.map(s => s.Id), 0);
-    const newStudent = {
-      ...studentData,
-      Id: highestId + 1,
-      enrollmentDate: studentData.enrollmentDate || new Date().toISOString().split("T")[0]
-    };
-    students.push(newStudent);
-    return { ...newStudent };
+    try {
+      const params = {
+        records: [{
+          Name: `${studentData.first_name_c} ${studentData.last_name_c}`,
+          first_name_c: studentData.first_name_c,
+          last_name_c: studentData.last_name_c,
+          email_c: studentData.email_c,
+          phone_c: studentData.phone_c,
+          date_of_birth_c: studentData.date_of_birth_c,
+          address_c: studentData.address_c,
+          class_id_c: parseInt(studentData.class_id_c),
+          class_name_c: studentData.class_name_c,
+          enrollment_date_c: studentData.enrollment_date_c || new Date().toISOString().split("T")[0],
+          photo_c: studentData.photo_c || "",
+          parent_contact_c: studentData.parent_contact_c
+        }]
+      };
+
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} students:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating student:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async update(id, studentData) {
-    await delay(350);
-    const index = students.findIndex(s => s.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Student not found");
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: `${studentData.first_name_c} ${studentData.last_name_c}`,
+          first_name_c: studentData.first_name_c,
+          last_name_c: studentData.last_name_c,
+          email_c: studentData.email_c,
+          phone_c: studentData.phone_c,
+          date_of_birth_c: studentData.date_of_birth_c,
+          address_c: studentData.address_c,
+          class_id_c: parseInt(studentData.class_id_c),
+          class_name_c: studentData.class_name_c,
+          enrollment_date_c: studentData.enrollment_date_c,
+          photo_c: studentData.photo_c || "",
+          parent_contact_c: studentData.parent_contact_c
+        }]
+      };
+
+      const response = await apperClient.updateRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} students:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating student:", error?.response?.data?.message || error);
+      throw error;
     }
-    students[index] = { ...students[index], ...studentData, Id: parseInt(id) };
-    return { ...students[index] };
   },
 
   async delete(id) {
-    await delay(300);
-    const index = students.findIndex(s => s.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Student not found");
+    try {
+      const params = { 
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await apperClient.deleteRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} students:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0;
+      }
+    } catch (error) {
+      console.error("Error deleting student:", error?.response?.data?.message || error);
+      throw error;
     }
-    students.splice(index, 1);
-    return true;
   },
 
   async search(query) {
-    await delay(200);
-    const searchTerm = query.toLowerCase();
-    return students.filter(student => 
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm) ||
-      student.email.toLowerCase().includes(searchTerm) ||
-      student.phone.includes(searchTerm)
-    ).map(s => ({ ...s }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "first_name_c"}},
+          {"field": {"Name": "last_name_c"}},
+          {"field": {"Name": "email_c"}},
+          {"field": {"Name": "phone_c"}},
+          {"field": {"Name": "date_of_birth_c"}},
+          {"field": {"Name": "address_c"}},
+          {"field": {"Name": "class_id_c"}},
+          {"field": {"Name": "class_name_c"}},
+          {"field": {"Name": "enrollment_date_c"}},
+          {"field": {"Name": "photo_c"}},
+          {"field": {"Name": "parent_contact_c"}}
+        ],
+        whereGroups: [{
+          "operator": "OR",
+          "subGroups": [
+            {"conditions": [{"fieldName": "first_name_c", "operator": "Contains", "values": [query]}], "operator": ""},
+            {"conditions": [{"fieldName": "last_name_c", "operator": "Contains", "values": [query]}], "operator": ""},
+            {"conditions": [{"fieldName": "email_c", "operator": "Contains", "values": [query]}], "operator": ""},
+            {"conditions": [{"fieldName": "phone_c", "operator": "Contains", "values": [query]}], "operator": ""}
+          ]
+        }],
+        orderBy: [{"fieldName": "first_name_c", "sorttype": "ASC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error searching students:", error?.response?.data?.message || error);
+      throw error;
+    }
   }
 };

@@ -1,98 +1,354 @@
-import gradesData from "@/services/mockData/grades.json";
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
-let grades = [...gradesData];
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const tableName = 'grade_c';
 
 export const gradeService = {
   async getAll() {
-    await delay(300);
-    return [...grades];
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "teacher_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "marks_c"}},
+          {"field": {"Name": "max_marks_c"}},
+          {"field": {"Name": "exam_type_c"}},
+          {"field": {"Name": "date_c"}}
+        ],
+        orderBy: [{"fieldName": "Id", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching grades:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getById(id) {
-    await delay(200);
-    const grade = grades.find(g => g.Id === parseInt(id));
-    if (!grade) {
-      throw new Error("Grade not found");
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "teacher_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "marks_c"}},
+          {"field": {"Name": "max_marks_c"}},
+          {"field": {"Name": "exam_type_c"}},
+          {"field": {"Name": "date_c"}}
+        ]
+      };
+
+      const response = await apperClient.getRecordById(tableName, parseInt(id), params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching grade ${id}:`, error?.response?.data?.message || error);
+      throw error;
     }
-    return { ...grade };
   },
 
   async getByStudentId(studentId) {
-    await delay(250);
-    return grades.filter(g => g.studentId === parseInt(studentId)).map(g => ({ ...g }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "teacher_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "marks_c"}},
+          {"field": {"Name": "max_marks_c"}},
+          {"field": {"Name": "exam_type_c"}},
+          {"field": {"Name": "date_c"}}
+        ],
+        where: [{"FieldName": "student_id_c", "Operator": "EqualTo", "Values": [parseInt(studentId)]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching grades by student:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async getBySubject(subject) {
-    await delay(250);
-    return grades.filter(g => g.subject === subject).map(g => ({ ...g }));
+    try {
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "student_id_c"}},
+          {"field": {"Name": "teacher_id_c"}},
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "marks_c"}},
+          {"field": {"Name": "max_marks_c"}},
+          {"field": {"Name": "exam_type_c"}},
+          {"field": {"Name": "date_c"}}
+        ],
+        where: [{"FieldName": "subject_c", "Operator": "EqualTo", "Values": [subject]}],
+        orderBy: [{"fieldName": "date_c", "sorttype": "DESC"}],
+        pagingInfo: {"limit": 100, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching grades by subject:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async createBatch(gradeEntries) {
-    await delay(500);
-    const createdGrades = [];
-    
-    for (const gradeData of gradeEntries) {
-      const highestId = Math.max(...grades.map(g => g.Id), 0, ...createdGrades.map(g => g.Id));
-      const newGrade = {
-        ...gradeData,
-        Id: highestId + 1 + createdGrades.length
-      };
-      grades.push(newGrade);
-      createdGrades.push({ ...newGrade });
+    try {
+      const records = gradeEntries.map(gradeData => ({
+        Name: `${gradeData.subject_c} - ${gradeData.exam_type_c}`,
+        student_id_c: parseInt(gradeData.student_id_c),
+        teacher_id_c: parseInt(gradeData.teacher_id_c),
+        subject_c: gradeData.subject_c,
+        marks_c: parseFloat(gradeData.marks_c),
+        max_marks_c: parseFloat(gradeData.max_marks_c),
+        exam_type_c: gradeData.exam_type_c,
+        date_c: gradeData.date_c
+      }));
+
+      const params = { records };
+
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} grades:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.map(r => r.data);
+      }
+    } catch (error) {
+      console.error("Error creating grade batch:", error?.response?.data?.message || error);
+      throw error;
     }
-    
-    return createdGrades;
   },
 
   async create(gradeData) {
-    await delay(400);
-    const highestId = Math.max(...grades.map(g => g.Id), 0);
-    const newGrade = {
-      ...gradeData,
-      Id: highestId + 1
-    };
-    grades.push(newGrade);
-    return { ...newGrade };
+    try {
+      const params = {
+        records: [{
+          Name: `${gradeData.subject_c} - ${gradeData.exam_type_c}`,
+          student_id_c: parseInt(gradeData.student_id_c),
+          teacher_id_c: parseInt(gradeData.teacher_id_c),
+          subject_c: gradeData.subject_c,
+          marks_c: parseFloat(gradeData.marks_c),
+          max_marks_c: parseFloat(gradeData.max_marks_c),
+          exam_type_c: gradeData.exam_type_c,
+          date_c: gradeData.date_c
+        }]
+      };
+
+      const response = await apperClient.createRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} grades:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error creating grade:", error?.response?.data?.message || error);
+      throw error;
+    }
   },
 
   async update(id, gradeData) {
-    await delay(350);
-    const index = grades.findIndex(g => g.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Grade not found");
+    try {
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: `${gradeData.subject_c} - ${gradeData.exam_type_c}`,
+          student_id_c: parseInt(gradeData.student_id_c),
+          teacher_id_c: parseInt(gradeData.teacher_id_c),
+          subject_c: gradeData.subject_c,
+          marks_c: parseFloat(gradeData.marks_c),
+          max_marks_c: parseFloat(gradeData.max_marks_c),
+          exam_type_c: gradeData.exam_type_c,
+          date_c: gradeData.date_c
+        }]
+      };
+
+      const response = await apperClient.updateRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} grades:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0 ? successful[0].data : null;
+      }
+    } catch (error) {
+      console.error("Error updating grade:", error?.response?.data?.message || error);
+      throw error;
     }
-    grades[index] = { ...grades[index], ...gradeData, Id: parseInt(id) };
-    return { ...grades[index] };
   },
 
   async delete(id) {
-    await delay(300);
-    const index = grades.findIndex(g => g.Id === parseInt(id));
-    if (index === -1) {
-      throw new Error("Grade not found");
+    try {
+      const params = { 
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await apperClient.deleteRecord(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const successful = response.results.filter(r => r.success);
+        const failed = response.results.filter(r => !r.success);
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} grades:`, failed);
+          failed.forEach(record => {
+            if (record.message) throw new Error(record.message);
+          });
+        }
+        return successful.length > 0;
+      }
+    } catch (error) {
+      console.error("Error deleting grade:", error?.response?.data?.message || error);
+      throw error;
     }
-    grades.splice(index, 1);
-    return true;
   },
 
-  async getClassAverages(classId) {
-    await delay(300);
-    // This would require joining with student data in a real implementation
-    const classGrades = grades.filter(g => g.classId === classId);
-    const subjects = [...new Set(classGrades.map(g => g.subject))];
-    
-    return subjects.map(subject => {
-      const subjectGrades = classGrades.filter(g => g.subject === subject);
-      const average = subjectGrades.reduce((sum, grade) => 
-        sum + (grade.marks / grade.maxMarks * 100), 0) / subjectGrades.length;
-      
-      return {
-        subject,
-        average: Math.round(average * 100) / 100,
-        count: subjectGrades.length
+  async getClassAverages(class_id_c) {
+    try {
+      // Get all students in the class first
+      const { ApperClient } = window.ApperSDK;
+      const studentClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const studentsParams = {
+        fields: [{"field": {"Name": "Id"}}],
+        where: [{"FieldName": "class_id_c", "Operator": "EqualTo", "Values": [class_id_c]}],
+        pagingInfo: {"limit": 100, "offset": 0}
       };
-    });
+
+      const studentsResponse = await studentClient.fetchRecords('student_c', studentsParams);
+      
+      if (!studentsResponse.success || !studentsResponse.data) {
+        return [];
+      }
+
+      const studentIds = studentsResponse.data.map(s => s.Id);
+
+      if (studentIds.length === 0) {
+        return [];
+      }
+
+      // Get grades for these students
+      const params = {
+        fields: [
+          {"field": {"Name": "subject_c"}},
+          {"field": {"Name": "marks_c"}},
+          {"field": {"Name": "max_marks_c"}}
+        ],
+        where: [{"FieldName": "student_id_c", "Operator": "ExactMatch", "Values": studentIds}],
+        pagingInfo: {"limit": 1000, "offset": 0}
+      };
+
+      const response = await apperClient.fetchRecords(tableName, params);
+      
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      const grades = response.data || [];
+      const subjects = [...new Set(grades.map(g => g.subject_c))];
+      
+      return subjects.map(subject => {
+        const subjectGrades = grades.filter(g => g.subject_c === subject);
+        const average = subjectGrades.reduce((sum, grade) => 
+          sum + (grade.marks_c / grade.max_marks_c * 100), 0) / subjectGrades.length;
+        
+        return {
+          subject,
+          average: Math.round(average * 100) / 100,
+          count: subjectGrades.length
+        };
+      });
+    } catch (error) {
+      console.error("Error calculating class averages:", error?.response?.data?.message || error);
+      throw error;
+    }
   }
 };

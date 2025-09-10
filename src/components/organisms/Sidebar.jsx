@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ApperIcon from "@/components/ApperIcon";
+import LogoutButton from "@/components/molecules/LogoutButton";
 import { cn } from "@/utils/cn";
 
 const Sidebar = ({ isOpen, onToggle }) => {
@@ -67,11 +68,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
             <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
               <ApperIcon name="User" size={16} className="text-white" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">Admin User</p>
+<div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">School Admin</p>
               <p className="text-xs text-slate-600 truncate">admin@school.edu</p>
             </div>
+            <LogoutButton size="sm" />
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -151,11 +154,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                 <ApperIcon name="User" size={16} className="text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">Admin User</p>
+<div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 truncate">School Admin</p>
                 <p className="text-xs text-slate-600 truncate">admin@school.edu</p>
               </div>
+              <LogoutButton size="sm" />
             </div>
+          </div>
           </div>
         </div>
       </div>
