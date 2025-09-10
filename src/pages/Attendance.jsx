@@ -10,7 +10,7 @@ import Loading from "@/components/ui/Loading";
 import FormField from "@/components/molecules/FormField";
 import Badge from "@/components/atoms/Badge";
 import Select from "@/components/atoms/Select";
-import DateRangeFilter from "@/components/molecules/DateRangeFilter";
+import DateRangeFilter from "@/components/atoms/DateRangeFilter";
 import Card from "@/components/atoms/Card";
 import Button from "@/components/atoms/Button";
 import AttendanceGrid from "@/components/organisms/AttendanceGrid";
