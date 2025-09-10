@@ -1,0 +1,82 @@
+[
+  {
+    "Id": 1,
+    "studentId": 1,
+    "subject": "Mathematics",
+    "marks": 85,
+    "maxMarks": 100,
+    "examType": "Midterm",
+    "date": "2023-10-15",
+    "teacherId": "T001"
+  },
+  {
+    "Id": 2,
+    "studentId": 1,
+    "subject": "English",
+    "marks": 92,
+    "maxMarks": 100,
+    "examType": "Midterm",
+    "date": "2023-10-16",
+    "teacherId": "T002"
+  },
+  {
+    "Id": 3,
+    "studentId": 2,
+    "subject": "Mathematics",
+    "marks": 78,
+    "maxMarks": 100,
+    "examType": "Midterm",
+    "date": "2023-10-15",
+    "teacherId": "T001"
+  },
+  {
+    "Id": 4,
+    "studentId": 2,
+    "subject": "English",
+    "marks": 88,
+    "maxMarks": 100,
+    "examType": "Midterm",
+    "date": "2023-10-16",
+    "teacherId": "T002"
+  },
+  {
+    "Id": 5,
+    "studentId": 3,
+    "subject": "Physics",
+    "marks": 90,
+    "maxMarks": 100,
+    "examType": "Quiz",
+    "date": "2023-11-01",
+    "teacherId": "T003"
+  },
+  {
+    "Id": 6,
+    "studentId": 3,
+    "subject": "Chemistry",
+    "marks": 87,
+    "maxMarks": 100,
+    "examType": "Test",
+    "date": "2023-11-02",
+    "teacherId": "T003"
+  },
+  {
+    "Id": 7,
+    "studentId": 4,
+    "subject": "Physics",
+    "marks": 82,
+    "maxMarks": 100,
+    "examType": "Quiz",
+    "date": "2023-11-01",
+    "teacherId": "T003"
+  },
+  {
+    "Id": 8,
+    "studentId": 5,
+    "subject": "Advanced Mathematics",
+    "marks": 95,
+    "maxMarks": 100,
+    "examType": "Final",
+    "date": "2023-12-05",
+    "teacherId": "T001"
+  }
+]

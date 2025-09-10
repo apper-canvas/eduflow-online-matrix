@@ -1,0 +1,66 @@
+[
+  {
+    "Id": 1,
+    "studentId": 1,
+    "date": "2023-11-20",
+    "status": "Present",
+    "classId": "CLS001",
+    "period": "All Day"
+  },
+  {
+    "Id": 2,
+    "studentId": 2,
+    "date": "2023-11-20",
+    "status": "Present",
+    "classId": "CLS001",
+    "period": "All Day"
+  },
+  {
+    "Id": 3,
+    "studentId": 3,
+    "date": "2023-11-20",
+    "status": "Late",
+    "classId": "CLS002",
+    "period": "All Day"
+  },
+  {
+    "Id": 4,
+    "studentId": 4,
+    "date": "2023-11-20",
+    "status": "Present",
+    "classId": "CLS002",
+    "period": "All Day"
+  },
+  {
+    "Id": 5,
+    "studentId": 5,
+    "date": "2023-11-20",
+    "status": "Present",
+    "classId": "CLS003",
+    "period": "All Day"
+  },
+  {
+    "Id": 6,
+    "studentId": 1,
+    "date": "2023-11-21",
+    "status": "Absent",
+    "classId": "CLS001",
+    "period": "All Day"
+  },
+  {
+    "Id": 7,
+    "studentId": 2,
+    "date": "2023-11-21",
+    "status": "Present",
+    "classId": "CLS001",
+    "period": "All Day"
+  },
+  {
+    "Id": 8,
+    "studentId": 3,
+    "date": "2023-11-21",
+    "status": "Present",
+    "classId": "CLS002",
+    "period": "All Day"
+  }
+]
