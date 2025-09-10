@@ -67,9 +67,10 @@ const [formData, setFormData] = useState({
       phone: '',
       dateOfBirth: '',
       address: '',
-      classId: '',
+classId: '',
       parentContact: '',
-      marks: ''
+      marks: '',
+      previousSchoolName: ''
     });
 
     // Update form data when editingStudent changes
@@ -84,7 +85,8 @@ firstName: editingStudent.firstName || '',
           address: editingStudent.address || '',
           classId: editingStudent.classId || '',
           parentContact: editingStudent.parentContact || '',
-          marks: editingStudent.marks || ''
+marks: editingStudent.marks || '',
+          previousSchoolName: editingStudent.previousSchoolName || ''
         });
       }
     }, [editingStudent]);
@@ -147,19 +149,20 @@ firstName: editingStudent.firstName || '',
         errors.classId = 'Class selection is required';
       }
       
-      if (!formData.parentContact.trim()) {
+if (!formData.parentContact.trim()) {
         errors.parentContact = 'Parent contact is required';
       }
-<FormField
-              label="Marks"
-              type="number"
-              name="marks"
-              value={formData.marks}
-              onChange={handleInputChange}
-              placeholder="Enter marks"
-              min="0"
-              max="100"
-            />
+      
+      if (!formData.previousSchoolName.trim()) {
+        errors.previousSchoolName = 'Previous school name is required';
+      }
+      
+      if (!formData.marks.trim()) {
+        errors.marks = 'Marks are required';
+      } else if (isNaN(formData.marks) || formData.marks < 0 || formData.marks > 100) {
+        errors.marks = 'Marks must be a number between 0 and 100';
+      }
+      
       return errors;
     };
 
@@ -182,11 +185,12 @@ const className = classOptions.find(option => option.value === formData.classId)
           phone_c: formData.phone,
           date_of_birth_c: formData.dateOfBirth,
           address_c: formData.address,
-          class_id_c: formData.classId,
+class_id_c: formData.classId,
           class_name_c: className,
-          parent_contact_c: formData.parentContact
-};
-        
+          parent_contact_c: formData.parentContact,
+          marks_c: formData.marks,
+          previous_school_name_c: formData.previousSchoolName
+        };
         if (isEditMode) {
           await studentService.update(editingStudent.Id, studentData);
           toast.success('Student updated successfully!');
@@ -216,8 +220,9 @@ const handleCloseModal = () => {
         phone: '',
         dateOfBirth: '',
         address: '',
-        classId: '',
-parentContact: '',
+classId: '',
+        parentContact: '',
+        previousSchoolName: '',
         marks: ''
       });
       setFormErrors({});
@@ -314,9 +319,31 @@ parentContact: '',
                 name="parentContact"
                 value={formData.parentContact}
                 onChange={handleInputChange}
-                error={formErrors.parentContact}
+error={formErrors.parentContact}
                 placeholder="Parent Name - (555) 123-4567"
-/>
+              />
+
+              <FormField
+                label="Previous School Name"
+                type="text"
+                name="previousSchoolName"
+                value={formData.previousSchoolName}
+                onChange={handleInputChange}
+                error={formErrors.previousSchoolName}
+                placeholder="Enter previous school name"
+              />
+
+              <FormField
+                label="Marks"
+                type="number"
+                name="marks"
+                value={formData.marks}
+                onChange={handleInputChange}
+                error={formErrors.marks}
+                placeholder="Enter marks"
+                min="0"
+                max="100"
+              />
 
               <div className="flex justify-end space-x-3 pt-4">
                 <button
