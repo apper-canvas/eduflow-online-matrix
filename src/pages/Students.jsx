@@ -72,17 +72,17 @@ const [formData, setFormData] = useState({
     });
 
     // Update form data when editingStudent changes
-    useEffect(() => {
+useEffect(() => {
       if (editingStudent) {
         setFormData({
-          firstName: editingStudent.first_name_c || '',
-          lastName: editingStudent.last_name_c || '',
-          email: editingStudent.email_c || '',
-          phone: editingStudent.phone_c || '',
-          dateOfBirth: editingStudent.date_of_birth_c || '',
-          address: editingStudent.address_c || '',
-          classId: editingStudent.class_id_c || '',
-          parentContact: editingStudent.parent_contact_c || ''
+          firstName: editingStudent.firstName || '',
+          lastName: editingStudent.lastName || '',
+          email: editingStudent.email || '',
+          phone: editingStudent.phone || '',
+          dateOfBirth: editingStudent.dateOfBirth || '',
+          address: editingStudent.address || '',
+          classId: editingStudent.classId || '',
+          parentContact: editingStudent.parentContact || ''
         });
       }
     }, [editingStudent]);
