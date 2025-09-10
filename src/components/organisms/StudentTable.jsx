@@ -17,9 +17,9 @@ const StudentTable = ({ students = [], classes = [], onEdit, onDelete, onView, o
   const filteredStudents = students.filter(student => {
     // Search filter
     const matchesSearch = !searchTerm || 
-      `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+`${student.firstName} ${student.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.studentId?.toString().includes(searchTerm);
+      student.Id?.toString().includes(searchTerm);
 
     // Grade filter
     const matchesGrade = !filters.grade || student.grade?.toString() === filters.grade;
@@ -165,7 +165,7 @@ const getClassBadgeVariant = (className) => {
           <tbody>
             {sortedStudents.map((student, index) => (
               <tr
-                key={student.Id}
+key={student.Id}
                 className={cn(
                   "border-b border-slate-100 hover:bg-gradient-to-r hover:from-slate-50/50 hover:to-slate-100/50 transition-all duration-200",
                   index % 2 === 0 ? "bg-white" : "bg-slate-50/30"
@@ -175,27 +175,27 @@ const getClassBadgeVariant = (className) => {
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
 <span className="text-sm font-medium text-primary-700">
-                        {student.firstName?.[0] || '?'}{student.lastName?.[0] || '?'}
+{student.firstName?.[0] || '?'}{student.lastName?.[0] || '?'}
                       </span>
                     </div>
                     <div>
                       <p className="font-medium text-slate-900">
-                        {student.firstName} {student.lastName}
+{student.firstName} {student.lastName}
                       </p>
                       <p className="text-sm text-slate-600">{student.phone}</p>
                     </div>
                   </div>
                 </td>
                 <td className="p-4">
-                  <span className="text-sm text-slate-900">{student.email}</span>
+<span className="text-sm text-slate-900">{student.email}</span>
                 </td>
                 <td className="p-4">
-                  <Badge variant={getClassBadgeVariant(student.className)}>
+<Badge variant={getClassBadgeVariant(student.className)}>
                     {student.className}
                   </Badge>
                 </td>
                 <td className="p-4">
-                  <span className="text-sm text-slate-600">
+<span className="text-sm text-slate-600">
                     {new Date(student.enrollmentDate).toLocaleDateString()}
                   </span>
                 </td>
@@ -220,7 +220,7 @@ const getClassBadgeVariant = (className) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onDelete && onDelete(student.Id)}
+onClick={() => onDelete && onDelete(student.Id)}
                       className="text-slate-600 hover:text-red-600"
                     >
                       <ApperIcon name="Trash2" size={16} />

@@ -7,7 +7,7 @@ const apperClient = new ApperClient({
 const tableName = 'student_c';
 
 export const studentService = {
-  async getAll() {
+async getAll() {
     try {
       const params = {
         fields: [
@@ -36,7 +36,24 @@ export const studentService = {
         throw new Error(response.message);
       }
 
-      return response.data || [];
+      // Transform database field names to camelCase for UI consistency
+      const transformedData = (response.data || []).map(student => ({
+        Id: student.Id,
+        Name: student.Name,
+        firstName: student.first_name_c,
+        lastName: student.last_name_c,
+        email: student.email_c,
+        phone: student.phone_c,
+        dateOfBirth: student.date_of_birth_c,
+        address: student.address_c,
+        classId: student.class_id_c,
+        className: student.class_name_c,
+        enrollmentDate: student.enrollment_date_c,
+        photo: student.photo_c,
+        parentContact: student.parent_contact_c
+      }));
+
+      return transformedData;
     } catch (error) {
       console.error("Error fetching students:", error?.response?.data?.message || error);
       throw error;
@@ -44,7 +61,7 @@ export const studentService = {
   },
 
   async getById(id) {
-    try {
+try {
       const params = {
         fields: [
           {"field": {"Name": "Id"}},
@@ -70,7 +87,26 @@ export const studentService = {
         throw new Error(response.message);
       }
 
-      return response.data;
+      // Transform database field names to camelCase for UI consistency
+      const student = response.data;
+      if (student) {
+        return {
+          Id: student.Id,
+          Name: student.Name,
+          firstName: student.first_name_c,
+          lastName: student.last_name_c,
+          email: student.email_c,
+          phone: student.phone_c,
+          dateOfBirth: student.date_of_birth_c,
+          address: student.address_c,
+          classId: student.class_id_c,
+          className: student.class_name_c,
+          enrollmentDate: student.enrollment_date_c,
+          photo: student.photo_c,
+          parentContact: student.parent_contact_c
+        };
+      }
+      return null;
     } catch (error) {
       console.error(`Error fetching student ${id}:`, error?.response?.data?.message || error);
       throw error;
@@ -78,7 +114,7 @@ export const studentService = {
   },
 
   async getByClassId(classId) {
-    try {
+try {
       const params = {
         fields: [
           {"field": {"Name": "Id"}},
@@ -107,7 +143,24 @@ export const studentService = {
         throw new Error(response.message);
       }
 
-      return response.data || [];
+      // Transform database field names to camelCase for UI consistency
+      const transformedData = (response.data || []).map(student => ({
+        Id: student.Id,
+        Name: student.Name,
+        firstName: student.first_name_c,
+        lastName: student.last_name_c,
+        email: student.email_c,
+        phone: student.phone_c,
+        dateOfBirth: student.date_of_birth_c,
+        address: student.address_c,
+        classId: student.class_id_c,
+        className: student.class_name_c,
+        enrollmentDate: student.enrollment_date_c,
+        photo: student.photo_c,
+        parentContact: student.parent_contact_c
+      }));
+
+      return transformedData;
     } catch (error) {
       console.error("Error fetching students by class:", error?.response?.data?.message || error);
       throw error;
@@ -140,7 +193,7 @@ export const studentService = {
         throw new Error(response.message);
       }
 
-      if (response.results) {
+if (response.results) {
         const successful = response.results.filter(r => r.success);
         const failed = response.results.filter(r => !r.success);
         
@@ -150,7 +203,27 @@ export const studentService = {
             if (record.message) throw new Error(record.message);
           });
         }
-        return successful.length > 0 ? successful[0].data : null;
+        
+        // Transform the created student data to camelCase for UI consistency
+        if (successful.length > 0) {
+          const student = successful[0].data;
+          return {
+            Id: student.Id,
+            Name: student.Name,
+            firstName: student.first_name_c,
+            lastName: student.last_name_c,
+            email: student.email_c,
+            phone: student.phone_c,
+            dateOfBirth: student.date_of_birth_c,
+            address: student.address_c,
+            classId: student.class_id_c,
+            className: student.class_name_c,
+            enrollmentDate: student.enrollment_date_c,
+            photo: student.photo_c,
+            parentContact: student.parent_contact_c
+          };
+        }
+        return null;
       }
     } catch (error) {
       console.error("Error creating student:", error?.response?.data?.message || error);
@@ -184,8 +257,7 @@ export const studentService = {
         console.error(response.message);
         throw new Error(response.message);
       }
-
-      if (response.results) {
+if (response.results) {
         const successful = response.results.filter(r => r.success);
         const failed = response.results.filter(r => !r.success);
         
@@ -195,7 +267,27 @@ export const studentService = {
             if (record.message) throw new Error(record.message);
           });
         }
-        return successful.length > 0 ? successful[0].data : null;
+        
+        // Transform the updated student data to camelCase for UI consistency
+        if (successful.length > 0) {
+          const student = successful[0].data;
+          return {
+            Id: student.Id,
+            Name: student.Name,
+            firstName: student.first_name_c,
+            lastName: student.last_name_c,
+            email: student.email_c,
+            phone: student.phone_c,
+            dateOfBirth: student.date_of_birth_c,
+            address: student.address_c,
+            classId: student.class_id_c,
+            className: student.class_name_c,
+            enrollmentDate: student.enrollment_date_c,
+            photo: student.photo_c,
+            parentContact: student.parent_contact_c
+          };
+        }
+        return null;
       }
     } catch (error) {
       console.error("Error updating student:", error?.response?.data?.message || error);
@@ -234,7 +326,7 @@ export const studentService = {
     }
   },
 
-  async search(query) {
+async search(query) {
     try {
       const params = {
         fields: [
@@ -262,7 +354,7 @@ export const studentService = {
           ]
         }],
         orderBy: [{"fieldName": "first_name_c", "sorttype": "ASC"}],
-        pagingInfo: {"limit": 100, "offset": 0}
+        pagingInfo: {"limit": 50, "offset": 0}
       };
 
       const response = await apperClient.fetchRecords(tableName, params);
@@ -272,7 +364,24 @@ export const studentService = {
         throw new Error(response.message);
       }
 
-      return response.data || [];
+      // Transform database field names to camelCase for UI consistency
+      const transformedData = (response.data || []).map(student => ({
+        Id: student.Id,
+        Name: student.Name,
+        firstName: student.first_name_c,
+        lastName: student.last_name_c,
+        email: student.email_c,
+        phone: student.phone_c,
+        dateOfBirth: student.date_of_birth_c,
+        address: student.address_c,
+        classId: student.class_id_c,
+        className: student.class_name_c,
+        enrollmentDate: student.enrollment_date_c,
+        photo: student.photo_c,
+        parentContact: student.parent_contact_c
+      }));
+
+      return transformedData;
     } catch (error) {
       console.error("Error searching students:", error?.response?.data?.message || error);
       throw error;

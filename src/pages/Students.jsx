@@ -143,10 +143,17 @@ const handleAddStudent = () => {
 
       setSubmitting(true);
       try {
-        const className = classOptions.find(option => option.value === formData.classId)?.label || '';
+const className = classOptions.find(option => option.value === formData.classId)?.label || '';
         const studentData = {
-          ...formData,
-          className
+          first_name_c: formData.firstName,
+          last_name_c: formData.lastName,
+          email_c: formData.email,
+          phone_c: formData.phone,
+          date_of_birth_c: formData.dateOfBirth,
+          address_c: formData.address,
+          class_id_c: formData.classId,
+          class_name_c: className,
+          parent_contact_c: formData.parentContact
         };
         
         await studentService.create(studentData);
