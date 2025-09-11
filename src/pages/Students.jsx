@@ -87,8 +87,9 @@ const [formData, setFormData] = useState({
 classId: '',
       department: '',
       parentContact: '',
-      marks: '',
-      previousSchoolName: ''
+marks: '',
+      previousSchoolName: '',
+      passingYear: ''
     });
 
     // Update form data when editingStudent changes
@@ -105,7 +106,8 @@ firstName: editingStudent.firstName || '',
           department: editingStudent.department || '',
           parentContact: editingStudent.parentContact || '',
 marks: editingStudent.marks || '',
-          previousSchoolName: editingStudent.previousSchoolName || ''
+previousSchoolName: editingStudent.previousSchoolName || '',
+          passingYear: editingStudent.passingYear || ''
         });
       }
     }, [editingStudent]);
@@ -178,6 +180,18 @@ if (!formData.department.trim()) {
         errors.previousSchoolName = 'Previous school name is required';
       }
       
+if (!formData.marks.trim()) {
+        errors.marks = 'Marks are required';
+      } else if (isNaN(formData.marks) || formData.marks < 0 || formData.marks > 100) {
+        errors.marks = 'Marks must be a number between 0 and 100';
+      }
+      
+      if (!formData.passingYear.trim()) {
+        errors.passingYear = 'Passing year is required';
+      } else if (isNaN(formData.passingYear) || formData.passingYear < 1900 || formData.passingYear > 2030) {
+        errors.passingYear = 'Please enter a valid year (1900-2030)';
+      }
+      
       if (!formData.marks.trim()) {
         errors.marks = 'Marks are required';
       } else if (isNaN(formData.marks) || formData.marks < 0 || formData.marks > 100) {
@@ -211,6 +225,7 @@ class_id_c: formData.classId,
 parent_contact_c: formData.parentContact,
           marks_c: parseInt(formData.marks) || 0,
 previous_school_name_c: formData.previousSchoolName,
+          passing_year_c: parseInt(formData.passingYear) || null,
           department_c: formData.department
         };
         if (isEditMode) {
@@ -246,7 +261,8 @@ classId: '',
         parentContact: '',
 department: '',
         previousSchoolName: '',
-        marks: ''
+marks: '',
+        passingYear: ''
       });
       setFormErrors({});
     };
@@ -375,6 +391,18 @@ error={formErrors.parentContact}
                 placeholder="Enter marks"
                 min="0"
                 max="100"
+/>
+
+              <FormField
+                label="Passing Year"
+                type="number"
+                name="passingYear"
+                value={formData.passingYear}
+                onChange={handleInputChange}
+                error={formErrors.passingYear}
+                placeholder="Enter passing year (e.g., 2024)"
+                min="1900"
+                max="2030"
               />
 
               <div className="flex justify-end space-x-3 pt-4">
