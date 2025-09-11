@@ -85,6 +85,7 @@ const [formData, setFormData] = useState({
       dateOfBirth: '',
       address: '',
 classId: '',
+      department: '',
       parentContact: '',
       marks: '',
       previousSchoolName: ''
@@ -101,6 +102,7 @@ firstName: editingStudent.firstName || '',
           dateOfBirth: editingStudent.dateOfBirth || '',
           address: editingStudent.address || '',
           classId: editingStudent.classId || '',
+          department: editingStudent.department || '',
           parentContact: editingStudent.parentContact || '',
 marks: editingStudent.marks || '',
           previousSchoolName: editingStudent.previousSchoolName || ''
@@ -169,7 +171,9 @@ const classOptions = [
 if (!formData.parentContact.trim()) {
         errors.parentContact = 'Parent contact is required';
       }
-      
+if (!formData.department.trim()) {
+        errors.department = 'Department is required';
+      }
       if (!formData.previousSchoolName.trim()) {
         errors.previousSchoolName = 'Previous school name is required';
       }
@@ -206,7 +210,8 @@ class_id_c: formData.classId,
           class_name_c: className,
 parent_contact_c: formData.parentContact,
           marks_c: parseInt(formData.marks) || 0,
-          previous_school_name_c: formData.previousSchoolName
+previous_school_name_c: formData.previousSchoolName,
+          department_c: formData.department
         };
         if (isEditMode) {
           await studentService.update(editingStudent.Id, studentData);
@@ -239,6 +244,7 @@ const handleCloseModal = () => {
         address: '',
 classId: '',
         parentContact: '',
+department: '',
         previousSchoolName: '',
         marks: ''
       });
@@ -328,7 +334,16 @@ classId: '',
                 value={formData.classId}
                 onChange={handleInputChange}
                 options={classOptions}
-                error={formErrors.classId}
+error={formErrors.classId}
+              />
+
+              <FormField
+                label="Department"
+                name="department"
+                value={formData.department}
+                onChange={handleInputChange}
+                error={formErrors.department}
+                placeholder="Enter department"
               />
 
               <FormField
