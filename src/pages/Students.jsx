@@ -451,12 +451,6 @@ if (students.length === 0) {
 
   return (
 <div className="space-y-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">
-          Student Management
-        </h1>
-      </div>
-
 <div className="space-y-6">
         <div className="mb-8">
           {classFilter && (
